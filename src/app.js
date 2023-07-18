@@ -5,11 +5,15 @@ const logger = require('morgan')
 const compression = require('compression')
 const helmet = require('helmet')
 const cors = require('cors')
+const conexionDB = require('./conexionDB')
 
 const indexRouter = require('./routes/index')
 const usersRouter = require('./routes/users')
 
+require('dotenv').config()
+
 const app = express()
+conexionDB()
 
 app.use(logger('dev'))
 app.use(compression())
