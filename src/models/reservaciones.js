@@ -2,26 +2,38 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const reservacionSchema = new Schema({
-  usuario_id: {
+  usuarioId: {
     type: Schema.Types.ObjectId,
     ref: 'Usuarios',
+    required: true,
   },
-  espacio_id: {
-    typeof: Schema.Types.ObjectId,
+  espacioId: {
+    type: Schema.Types.ObjectId,
     ref: 'EspacioTrabajo',
+    required: true,
   },
-  fecha_hora: {
-    fecha: {
+  validacionFechasReservacion: [
+    {
       type: Date,
       required: true,
     },
-    hora: {
+  ],
+  fechaInicioYFinal: {
+    fechaInicio: {
+      type: Date,
+      required: true,
+    },
+    fechaFin: {
       type: Date,
       required: true,
     },
   },
   detalles: {
     type: String,
+  },
+  PrecioTotal: {
+    type: Number,
+    required: true,
   },
 })
 
