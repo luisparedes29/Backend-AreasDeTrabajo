@@ -20,23 +20,9 @@ const espacioTrabajoSchema = new Schema({
     type: Number,
     required: true,
   },
-  disponibilidad: {
-    type: Boolean,
-    default: true,
-  },
-  precios: {
-    hora: {
-      type: Number,
-      required: true,
-    },
-    dia: {
-      type: Number,
-      required: true,
-    },
-    semana: {
-      type: Number,
-      required: true,
-    },
+  precioDia: {
+    type: Number,
+    required: true,
   },
   reservaciones: [
     {
@@ -44,6 +30,14 @@ const espacioTrabajoSchema = new Schema({
       ref: 'Reservaciones',
     },
   ], // Referencia a las reservaciones
+  vecesReservado: {
+    type: Number,
+    default: 0,
+  },
+  rendimientoEconomico: {
+    type: Number,
+    default: 0,
+  },
 })
 
 const EspacioTrabajo = mongoose.model('EspacioTrabajo', espacioTrabajoSchema)

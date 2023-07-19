@@ -7,7 +7,7 @@ const helmet = require('helmet')
 const cors = require('cors')
 const conexionDB = require('./conexionDB')
 
-const indexRouter = require('./routes/index')
+const reservacionesRouter = require('./routes/reservaciones')
 const usersRouter = require('./routes/users')
 
 require('dotenv').config()
@@ -24,7 +24,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
-app.use('/', indexRouter)
+app.use('/api/v1/reservaciones', reservacionesRouter)
 app.use('/users', usersRouter)
 
 app.use((req, res, next) => {
