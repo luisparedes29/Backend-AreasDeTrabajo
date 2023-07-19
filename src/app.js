@@ -6,6 +6,9 @@ const compression = require('compression')
 const helmet = require('helmet')
 const cors = require('cors')
 const conexionDB = require('./conexionDB')
+const swaggerUi = require('swagger-ui-express')
+const swaggerSpec = require('./v1/swagger')
+const { swaggerDocs: V1SwaggerDocs } = require('./v1/swagger')
 
 const reservacionesRouter = require('./routes/reservaciones')
 const usersRouter = require('./routes/users')
@@ -24,8 +27,11 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 app.use('/api/v1/reservaciones', reservacionesRouter)
 app.use('/users', usersRouter)
+
+V1SwaggerDocs(app, 3000)
 
 app.use((req, res, next) => {
   res.status(404).json('No se ha encontrado')
