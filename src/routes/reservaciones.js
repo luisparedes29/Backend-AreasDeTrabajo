@@ -181,7 +181,185 @@ router
  *                   items:
  *                     $ref: '#/components/schemas/Reservaciones'
  *       '500':
- *         description: Error del servidor. Hubo un problema al obtener las reservaciones.
+ *         description: Error del servidor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 mensaje:
+ *                   type: string
+ *                   description: Mensaje de error.
+ *                   example:  Hubo un problema al obtener las reservaciones.
+ */
+
+/**
+ * @openapi
+ * /obtenerReservacionesPorUsuario/{usuarioId}:
+ *   get:
+ *     tags:
+ *       - Reservaciones
+ *     summary: Obtener reservaciones por usuario.
+ *     parameters:
+ *       - in: path
+ *         name: usuarioId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID del usuario.
+ *     responses:
+ *       '200':
+ *         description: Respuesta exitosa. Devuelve las reservaciones del usuario.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ok:
+ *                   type: boolean
+ *                   description: Indica si la solicitud fue exitosa.
+ *                 reservaciones:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Reservaciones'
+ *       '500':
+ *         description: Error del servidor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 mensaje:
+ *                   type: string
+ *                   description: Mensaje de error.
+ *                   example: Hubo un problema al obtener las reservaciones
+ */
+
+/**
+ * @openapi
+ * /nuevaReservacion/{espacioId}/{usuarioId}:
+ *   post:
+ *     tags:
+ *       - Reservaciones
+ *     summary: Crear una nueva reservación.
+ *     parameters:
+ *       - in: path
+ *         name: espacioId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID del espacio de trabajo.
+ *       - in: path
+ *         name: usuarioId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID del usuario.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               fechaInicio:
+ *                 type: string
+ *                 format: date
+ *                 example: 2022-01-01
+ *               fechaFin:
+ *                 type: string
+ *                 format: date
+ *                 example: 2022-01-05
+ *               detalles:
+ *                 type: string
+ *             required:
+ *               - fechaInicio
+ *               - fechaFin
+ *     responses:
+ *       '201':
+ *         description: Reservación creada con éxito.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ok:
+ *                   type: boolean
+ *                   description: Indica si la solicitud fue exitosa.
+ *                 reservacion:
+ *                   $ref: '#/components/schemas/Reservaciones'
+ *       '400':
+ *         description: Alguna de las fechas ya está reservada.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 mensaje:
+ *                   type: string
+ *                   description: Mensaje de error.
+ *       '404':
+ *         description: Espacio de trabajo no encontrado.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 mensaje:
+ *                   type: string
+ *                   description: Mensaje de error.
+ *       '500':
+ *         description: Error del servidor. Hubo un problema al crear la reservación.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 mensaje:
+ *                   type: string
+ *                   description: Mensaje de error.
+ */
+
+/**
+ * @openapi
+ * /eliminarReservacion/{reservacionId}:
+ *   delete:
+ *     tags:
+ *       - Reservaciones
+ *     summary: Eliminar una reservación.
+ *     parameters:
+ *       - in: path
+ *         name: reservacionId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID de la reservación.
+ *     responses:
+ *       '200':
+ *         description: Reservación eliminada con éxito.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ok:
+ *                   type: boolean
+ *                   description: Indica si la solicitud fue exitosa.
+ *                 _id:
+ *                   type: string
+ *                   description: ID de la reservación eliminada.
+ *       '404':
+ *         description: Reservación no encontrada.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 mensaje:
+ *                   type: string
+ *                   description: Mensaje de error.
+ *       '500':
+ *         description: Error del servidor. Hubo un problema al eliminar la reservación.
  *         content:
  *           application/json:
  *             schema:

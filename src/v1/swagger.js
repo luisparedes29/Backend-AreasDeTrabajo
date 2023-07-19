@@ -7,7 +7,7 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'SAL Peliculas',
+      title: 'API Areas de trabajo',
       version: '1.0.0',
     },
   },
