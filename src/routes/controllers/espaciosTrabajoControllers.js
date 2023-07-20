@@ -2,6 +2,23 @@ const EspacioTrabajo = require('../../models/espacioTrabajo')
 const Reservaciones = require('../../models/reservaciones')
 const Usuarios = require('../../models/usuarios')
 
+//funcion para obtener todos los espacios de trabajo para el mapa
+
+const obtenerEspaciosTrabajoMapa = async (req, res) => {
+  try {
+    const espaciosTrabajo = await EspacioTrabajo.find().select(
+      'titulo descripcion ubicacion'
+    )
+    return res.json(espaciosTrabajo)
+  } catch (error) {
+    console.error('Error al obtener los espacios de trabajo:', error)
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Hubo un error al obtener los espacios de trabajo.',
+    })
+  }
+}
+
 //funcion para obtener todos los espacios de trabajo con un paginador
 
 const obtenerEspaciosTrabajo = async (req, res) => {
@@ -15,7 +32,7 @@ const obtenerEspaciosTrabajo = async (req, res) => {
     const espaciosTrabajo = await EspacioTrabajo.find()
       .skip(skip)
       .limit(limit)
-      .select('-__v')
+      .select('titulo imagenReferencia descripcion')
 
     const paginasTotal = Math.ceil(espaciosTrabajoConteo / limit)
 
@@ -135,6 +152,7 @@ const eliminarEspacioTrabajo = async (req, res) => {
   })
 }
 module.exports = {
+  obtenerEspaciosTrabajoMapa,
   obtenerEspaciosTrabajo,
   nuevoEspacioTrabajo,
   editarEspacioTrabajo,

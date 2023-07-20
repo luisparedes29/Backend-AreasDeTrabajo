@@ -12,6 +12,7 @@ const { swaggerDocs: V1SwaggerDocs } = require('./v1/swagger')
 
 const reservacionesRouter = require('./routes/reservaciones')
 const usersRouter = require('./routes/users')
+const espaciosRouter = require('./routes/espaciosTrabajo')
 
 require('dotenv').config()
 
@@ -28,7 +29,8 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
-app.use('/api/v1/reservaciones', reservacionesRouter)
+app.use('/espaciosTrabajo', espaciosRouter)
+app.use('/reservaciones', reservacionesRouter)
 app.use('/users', usersRouter)
 
 V1SwaggerDocs(app, 3000)
