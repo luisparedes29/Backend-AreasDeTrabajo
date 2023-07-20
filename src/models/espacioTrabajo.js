@@ -2,7 +2,15 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const espacioTrabajoSchema = new Schema({
+  titulo: {
+    type: String,
+    required: true,
+  },
   descripcion: {
+    type: String,
+    required: true,
+  },
+  direccion: {
     type: String,
     required: true,
   },
@@ -23,6 +31,9 @@ const espacioTrabajoSchema = new Schema({
   precioDia: {
     type: Number,
     required: true,
+  },
+  imagenReferencia: {
+    type: String,
   },
   reservaciones: [
     {
