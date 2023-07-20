@@ -7,7 +7,7 @@ const Usuarios = require('../../models/usuarios')
 const obtenerEspaciosTrabajoMapa = async (req, res) => {
   try {
     const espaciosTrabajo = await EspacioTrabajo.find().select(
-      'titulo descripcion ubicacion'
+      'titulo descripcion ubicacion precioDia'
     )
     return res.json(espaciosTrabajo)
   } catch (error) {
@@ -32,7 +32,7 @@ const obtenerEspaciosTrabajo = async (req, res) => {
     const espaciosTrabajo = await EspacioTrabajo.find()
       .skip(skip)
       .limit(limit)
-      .select('titulo imagenReferencia descripcion')
+      .select('titulo imagenReferencia precioDia direccion')
 
     const paginasTotal = Math.ceil(espaciosTrabajoConteo / limit)
 
@@ -55,7 +55,8 @@ const obtenerEspaciosTrabajo = async (req, res) => {
 //funcion para crear un nuevo espacio de trabajo
 const nuevoEspacioTrabajo = async (req, res) => {
   try {
-    const { titulo, descripcion, ubicacion, capacidad, precioDia } = req.body
+    const { titulo, descripcion, ubicacion, capacidad, precioDia, direccion } =
+      req.body
     //validamos que no exista otro espacio de trabajo con el mismo nombre
     const existeEspacioTrabajo = await EspacioTrabajo.findOne({
       titulo,
@@ -72,6 +73,7 @@ const nuevoEspacioTrabajo = async (req, res) => {
       ubicacion,
       capacidad,
       precioDia,
+      direccion,
     }
     const EspacioTrabajoCreada = await EspacioTrabajo.create(
       nuevoEspacioTrabajo

@@ -10,6 +10,10 @@ const espacioTrabajoSchema = new Schema({
     type: String,
     required: true,
   },
+  direccion: {
+    type: String,
+    required: true,
+  },
   ubicacion: {
     latitud: {
       type: Number,
