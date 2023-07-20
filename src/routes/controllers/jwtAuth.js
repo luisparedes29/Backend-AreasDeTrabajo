@@ -12,7 +12,7 @@ const validateToken = async (req, res, next) => {
     try {
         const decodedToken = await jwt.verify(token, process.env.secret);
         req.user = decodedToken.usuario;
-        if (decodedToken.data.isAdmin) {
+        if (decodedToken.data.admin) {
 
             next();
         } else {
