@@ -100,6 +100,10 @@ router
  *         precioDia:
  *           type: number
  *           example: 50.0
+ *         imagenReferencia:
+ *           type: string
+ *           format: uri
+ *           example: https://res.cloudinary.com/dhdm4ter5/image/upload/v1689835829/jkwprgjszmehbqa9g8nx.jpg
  *         reservaciones:
  *           type: array
  *           items:
