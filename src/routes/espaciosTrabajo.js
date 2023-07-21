@@ -14,12 +14,12 @@ const upload = require('../middleware/multer')
  *         name: page
  *         schema:
  *           type: integer
- *         description: Número de página para paginación 
+ *         description: Número de página para paginación
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
- *         description: Cantidad de espacios de trabajo por página 
+ *         description: Cantidad de espacios de trabajo por página
  *     responses:
  *       '200':
  *         description: Respuesta exitosa. Devuelve los espacios de trabajo paginados.
@@ -55,7 +55,7 @@ const upload = require('../middleware/multer')
  *                   type: string
  *                   description: Mensaje de error.
  *                   example:  Hubo un problema al obtener los espacios de trabajo.
- * 
+ *
  * /espaciosTrabajo/nuevo:
  *   post:
  *     tags:
@@ -118,7 +118,7 @@ const upload = require('../middleware/multer')
  *                   type: string
  *                   description: Mensaje de error.
  *                   example: Hubo un error al crear el espacio de trabajo
- * 
+ *
  * /espaciosTrabajo/editar/{espacioId}:
  *   put:
  *     tags:
@@ -192,7 +192,7 @@ const upload = require('../middleware/multer')
  *                   type: string
  *                   description: Mensaje de error.
  *                   example: Hubo un error al editar el espacio de trabajo.
- * 
+ *
  * /espaciosTrabajo/eliminar/{espacioId}:
  *   delete:
  *     tags:
@@ -247,8 +247,8 @@ const upload = require('../middleware/multer')
  *                   example: Hubo un error al eliminar el espacio de trabajo.
  */
 
-
 const {
+  obtenerSeisEspaciosTrabajo,
   obtenerEspaciosTrabajo,
   obtenerEspaciosTrabajoMapa,
   nuevoEspacioTrabajo,
@@ -259,8 +259,13 @@ const {
 router
   .get('/', obtenerEspaciosTrabajo)
   .get('/mapa', obtenerEspaciosTrabajoMapa)
+  .get('/inicio', obtenerSeisEspaciosTrabajo)
   .post('/nuevo', upload.single('imagenReferencia'), nuevoEspacioTrabajo)
-  .put('/editar/:espacioId', upload.single('imagenReferencia'), editarEspacioTrabajo)
+  .put(
+    '/editar/:espacioId',
+    upload.single('imagenReferencia'),
+    editarEspacioTrabajo
+  )
   .delete('/eliminar/:espacioId', eliminarEspacioTrabajo)
 
 module.exports = router

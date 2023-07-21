@@ -9,7 +9,6 @@ const obtenerReservaciones = async (req, res) => {
     const reservaciones = await Reservaciones.find()
       .populate('usuarioId') // Trae los datos del usuario relacionado
       .populate('espacioId') // Trae los datos del espacio de trabajo relacionado
-      .exec()
 
     return res.status(200).json({ ok: true, reservaciones: reservaciones })
   } catch (error) {
@@ -62,7 +61,7 @@ const obtenerReservacionesPorUsuario = async (req, res) => {
 // Ruta para crear una nueva reservación
 const nuevaReservacion = async (req, res) => {
   try {
-    const { fechaInicio, fechaFin, detalles } = req.body
+    const { fechaInicio, fechaFin, detalles, horaInicio, horaFin } = req.body
     const espacioId = req.params.espacioId
     const usuarioId = req.params.usuarioId
 
@@ -78,8 +77,25 @@ const nuevaReservacion = async (req, res) => {
 
     // Verificar si alguna de las fechas ya está reservada
     const reservacionesExistentes = await Reservaciones.find({
-      validacionFechasReservacion: { $in: fechasReservacion },
       espacioId,
+      $or: fechasReservacion.map((fecha) => ({
+        'fechaInicioYFinal.fechaInicio': { $lte: fecha },
+        'fechaInicioYFinal.fechaFin': { $gte: fecha },
+        $or: [
+          {
+            $and: [
+              { 'horaInicioYFinal.horaInicio': { $lte: horaInicio } },
+              { 'horaInicioYFinal.horaFin': { $gte: horaInicio } },
+            ],
+          },
+          {
+            $and: [
+              { 'horaInicioYFinal.horaInicio': { $lte: horaFin } },
+              { 'horaInicioYFinal.horaFin': { $gte: horaFin } },
+            ],
+          },
+        ],
+      })),
     })
 
     if (reservacionesExistentes.length > 0) {
@@ -109,6 +125,7 @@ const nuevaReservacion = async (req, res) => {
       espacioId,
       validacionFechasReservacion: fechasReservacion,
       fechaInicioYFinal: { fechaInicio, fechaFin },
+      horaInicioYFinal: { horaInicio, horaFin },
       detalles,
       precioTotal,
     }
