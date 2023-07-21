@@ -69,6 +69,8 @@ const nuevaReservacion = async (req, res) => {
     const fechasReservacion = []
     const currentDate = moment(fechaInicio)
     const endDate = moment(fechaFin)
+    const horaInicioDate = moment(horaInicio, 'HH:mm').toDate()
+    const horaFinDate = moment(horaFin, 'HH:mm').toDate()
 
     while (currentDate.isSameOrBefore(endDate, 'day')) {
       fechasReservacion.push(currentDate.toDate())
@@ -84,14 +86,20 @@ const nuevaReservacion = async (req, res) => {
         $or: [
           {
             $and: [
-              { 'horaInicioYFinal.horaInicio': { $lte: horaInicio } },
-              { 'horaInicioYFinal.horaFin': { $gte: horaInicio } },
+              { 'horaInicioYFinal.horaInicio': { $lte: horaInicioDate } },
+              { 'horaInicioYFinal.horaFin': { $gt: horaInicioDate } },
             ],
           },
           {
             $and: [
-              { 'horaInicioYFinal.horaInicio': { $lte: horaFin } },
-              { 'horaInicioYFinal.horaFin': { $gte: horaFin } },
+              { 'horaInicioYFinal.horaInicio': { $lt: horaFinDate } },
+              { 'horaInicioYFinal.horaFin': { $gte: horaFinDate } },
+            ],
+          },
+          {
+            $and: [
+              { 'horaInicioYFinal.horaInicio': { $gte: horaInicioDate } },
+              { 'horaInicioYFinal.horaFin': { $lte: horaFinDate } },
             ],
           },
         ],
@@ -125,7 +133,10 @@ const nuevaReservacion = async (req, res) => {
       espacioId,
       validacionFechasReservacion: fechasReservacion,
       fechaInicioYFinal: { fechaInicio, fechaFin },
-      horaInicioYFinal: { horaInicio, horaFin },
+      horaInicioYFinal: {
+        horaInicio: horaInicioDate,
+        horaFin: horaFinDate,
+      },
       detalles,
       precioTotal,
     }

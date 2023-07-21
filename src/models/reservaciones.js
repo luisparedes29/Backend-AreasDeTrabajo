@@ -35,7 +35,7 @@ const reservacionSchema = new Schema({
   detalles: {
     type: String,
   },
-  PrecioTotal: {
+  precioTotal: {
     type: Number,
     required: true,
   },
