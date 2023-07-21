@@ -3,6 +3,19 @@ const Reservaciones = require('../../models/reservaciones')
 const Usuarios = require('../../models/usuarios')
 const cloudinary = require('../../utilities/cloudinary')
 
+// funcion para obtener solo 6 espacios de trabajo
+const obtenerSeisEspaciosTrabajo = async (req, res) => {
+  try {
+    const espaciosTrabajo = await EspacioTrabajo.find().limit(6)
+    return res.json({ ok: true, espaciosTrabajo: espaciosTrabajo })
+  } catch (error) {
+    console.error('Error al obtener los espacios de trabajo:', error)
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Hubo un error al obtener los espacios de trabajo.',
+    })
+  }
+}
 
 //funcion para obtener todos los espacios de trabajo para el mapa
 
@@ -11,7 +24,7 @@ const obtenerEspaciosTrabajoMapa = async (req, res) => {
     const espaciosTrabajo = await EspacioTrabajo.find().select(
       'titulo descripcion ubicacion precioDia'
     )
-    return res.json(espaciosTrabajo)
+    return res.json({ ok: true, espaciosTrabajo: espaciosTrabajo })
   } catch (error) {
     console.error('Error al obtener los espacios de trabajo:', error)
     return res.status(500).json({
@@ -40,7 +53,7 @@ const obtenerEspaciosTrabajo = async (req, res) => {
 
     return res.json({
       ok: true,
-      espaciosTrabajo,
+      espacioTrabajo: espaciosTrabajo,
       ConteoTotal: espaciosTrabajoConteo,
       currentPagina: pagina,
       paginasTotal,
@@ -57,7 +70,6 @@ const obtenerEspaciosTrabajo = async (req, res) => {
 //funcion para crear un nuevo espacio de trabajo
 const nuevoEspacioTrabajo = async (req, res) => {
   try {
-
     if (!req.file) {
       return res
         .status(400)
@@ -71,8 +83,15 @@ const nuevoEspacioTrabajo = async (req, res) => {
 
     const imageUrl = result.secure_url
 
-    const { titulo, descripcion, ubicacion, capacidad, precioDia, direccion, imagenReferencia } =
-      req.body
+    const {
+      titulo,
+      descripcion,
+      ubicacion,
+      capacidad,
+      precioDia,
+      direccion,
+      imagenReferencia,
+    } = req.body
 
     //validamos que no exista otro espacio de trabajo con el mismo nombre
     const existeEspacioTrabajo = await EspacioTrabajo.findOne({
@@ -91,7 +110,7 @@ const nuevoEspacioTrabajo = async (req, res) => {
       capacidad,
       precioDia,
       direccion,
-      imagenReferencia: imageUrl
+      imagenReferencia: imageUrl,
     }
     const EspacioTrabajoCreada = await EspacioTrabajo.create(
       nuevoEspacioTrabajo
@@ -119,7 +138,14 @@ const nuevoEspacioTrabajo = async (req, res) => {
 const editarEspacioTrabajo = async (req, res) => {
   try {
     const { espacioId } = req.params
-    const { titulo, descripcion, ubicacion, capacidad, precioDia, imagenReferencia } = req.body
+    const {
+      titulo,
+      descripcion,
+      ubicacion,
+      capacidad,
+      precioDia,
+      imagenReferencia,
+    } = req.body
 
     if (!req.file) {
       return res
@@ -142,7 +168,7 @@ const editarEspacioTrabajo = async (req, res) => {
         ubicacion,
         capacidad,
         precioDia,
-        imagenReferencia: imageUrl
+        imagenReferencia: imageUrl,
       },
       { new: true }
     )
@@ -190,10 +216,11 @@ const eliminarEspacioTrabajo = async (req, res) => {
   res.json({
     ok: true,
     _id: espacioEliminado._id,
-    mensaje: "Espacio de trabajo eliminado"
+    mensaje: 'Espacio de trabajo eliminado',
   })
 }
 module.exports = {
+  obtenerSeisEspaciosTrabajo,
   obtenerEspaciosTrabajoMapa,
   obtenerEspaciosTrabajo,
   nuevoEspacioTrabajo,

@@ -9,7 +9,6 @@ const obtenerReservaciones = async (req, res) => {
     const reservaciones = await Reservaciones.find()
       .populate('usuarioId') // Trae los datos del usuario relacionado
       .populate('espacioId') // Trae los datos del espacio de trabajo relacionado
-      .exec()
 
     return res.status(200).json({ ok: true, reservaciones: reservaciones })
   } catch (error) {
@@ -62,7 +61,7 @@ const obtenerReservacionesPorUsuario = async (req, res) => {
 // Ruta para crear una nueva reservación
 const nuevaReservacion = async (req, res) => {
   try {
-    const { fechaInicio, fechaFin, detalles } = req.body
+    const { fechaInicio, fechaFin, detalles, horaInicio, horaFin } = req.body
     const espacioId = req.params.espacioId
     const usuarioId = req.params.usuarioId
 
@@ -70,6 +69,8 @@ const nuevaReservacion = async (req, res) => {
     const fechasReservacion = []
     const currentDate = moment(fechaInicio)
     const endDate = moment(fechaFin)
+    const horaInicioDate = moment(horaInicio, 'HH:mm').toDate()
+    const horaFinDate = moment(horaFin, 'HH:mm').toDate()
 
     while (currentDate.isSameOrBefore(endDate, 'day')) {
       fechasReservacion.push(currentDate.toDate())
@@ -78,8 +79,31 @@ const nuevaReservacion = async (req, res) => {
 
     // Verificar si alguna de las fechas ya está reservada
     const reservacionesExistentes = await Reservaciones.find({
-      validacionFechasReservacion: { $in: fechasReservacion },
       espacioId,
+      $or: fechasReservacion.map((fecha) => ({
+        'fechaInicioYFinal.fechaInicio': { $lte: fecha },
+        'fechaInicioYFinal.fechaFin': { $gte: fecha },
+        $or: [
+          {
+            $and: [
+              { 'horaInicioYFinal.horaInicio': { $lte: horaInicioDate } },
+              { 'horaInicioYFinal.horaFin': { $gt: horaInicioDate } },
+            ],
+          },
+          {
+            $and: [
+              { 'horaInicioYFinal.horaInicio': { $lt: horaFinDate } },
+              { 'horaInicioYFinal.horaFin': { $gte: horaFinDate } },
+            ],
+          },
+          {
+            $and: [
+              { 'horaInicioYFinal.horaInicio': { $gte: horaInicioDate } },
+              { 'horaInicioYFinal.horaFin': { $lte: horaFinDate } },
+            ],
+          },
+        ],
+      })),
     })
 
     if (reservacionesExistentes.length > 0) {
@@ -109,6 +133,10 @@ const nuevaReservacion = async (req, res) => {
       espacioId,
       validacionFechasReservacion: fechasReservacion,
       fechaInicioYFinal: { fechaInicio, fechaFin },
+      horaInicioYFinal: {
+        horaInicio: horaInicioDate,
+        horaFin: horaFinDate,
+      },
       detalles,
       precioTotal,
     }

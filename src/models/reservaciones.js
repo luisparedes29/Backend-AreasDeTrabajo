@@ -12,12 +12,6 @@ const reservacionSchema = new Schema({
     ref: 'EspacioTrabajo',
     required: true,
   },
-  validacionFechasReservacion: [
-    {
-      type: Date,
-      required: true,
-    },
-  ],
   fechaInicioYFinal: {
     fechaInicio: {
       type: Date,
@@ -28,10 +22,20 @@ const reservacionSchema = new Schema({
       required: true,
     },
   },
+  horaInicioYFinal: {
+    horaInicio: {
+      type: Date,
+      required: true,
+    },
+    horaFin: {
+      type: Date,
+      required: true,
+    },
+  },
   detalles: {
     type: String,
   },
-  PrecioTotal: {
+  precioTotal: {
     type: Number,
     required: true,
   },
