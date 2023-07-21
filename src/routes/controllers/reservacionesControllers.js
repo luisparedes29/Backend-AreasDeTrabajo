@@ -7,8 +7,15 @@ const obtenerReservaciones = async (req, res) => {
   try {
     // Obtener todas las reservaciones y sus datos de espacio de trabajo
     const reservaciones = await Reservaciones.find()
-      .populate('usuarioId') // Trae los datos del usuario relacionado
-      .populate('espacioId') // Trae los datos del espacio de trabajo relacionado
+      .populate({
+        path: 'usuarioId',
+        select: 'nombre email',
+      }) // Trae los datos del usuario relacionado
+      .populate({
+        path: 'espacioId',
+        select: 'titulo descripcion direccion capacidad precioDia',
+      }) // Trae los datos del espacio de trabajo relacionado
+      .select('-__v')
 
     return res.status(200).json({ ok: true, reservaciones: reservaciones })
   } catch (error) {
