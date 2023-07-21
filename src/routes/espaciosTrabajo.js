@@ -249,6 +249,7 @@ const upload = require('../middleware/multer')
 
 const {
   obtenerSeisEspaciosTrabajo,
+  obtenerEspacioTrabajoID,
   obtenerEspaciosTrabajo,
   obtenerEspaciosTrabajoMapa,
   nuevoEspacioTrabajo,
@@ -258,6 +259,7 @@ const {
 
 router
   .get('/', obtenerEspaciosTrabajo)
+  .get('/:espacioId', obtenerEspacioTrabajoID)
   .get('/mapa', obtenerEspaciosTrabajoMapa)
   .get('/inicio', obtenerSeisEspaciosTrabajo)
   .post('/nuevo', upload.single('imagenReferencia'), nuevoEspacioTrabajo)

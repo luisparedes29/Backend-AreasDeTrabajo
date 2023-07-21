@@ -2,6 +2,36 @@ const EspacioTrabajo = require('../../models/espacioTrabajo')
 const Reservaciones = require('../../models/reservaciones')
 const Usuarios = require('../../models/usuarios')
 const cloudinary = require('../../utilities/cloudinary')
+const mongoose = require('mongoose')
+
+//funcion para obtener un solo espacio de trabajo por su ID
+const obtenerEspacioTrabajoID = async (req, res) => {
+  try {
+    //validacion del ID para que sea como el ID de Mongoose
+    if (!mongoose.Types.ObjectId.isValid(req.params.espacioId)) {
+      return res.status(400).json({ error: 'ID no válido' })
+    }
+
+    const espacioTrabajo = await EspacioTrabajo.findById(req.params.espacioId)
+      .populate({
+        path: 'reservaciones',
+        populate: {
+          path: 'usuarioId',
+          select: 'nombre email',
+        },
+        select: '-__v',
+      })
+      .select('-__v')
+
+    return res.json({ ok: true, espacioTrabajo: espacioTrabajo })
+  } catch (error) {
+    console.error('Error al obtener el espacio de trabajo:', error)
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Hubo un error al obtener el espacio de trabajo.',
+    })
+  }
+}
 
 // funcion para obtener solo 6 espacios de trabajo
 const obtenerSeisEspaciosTrabajo = async (req, res) => {
@@ -83,15 +113,22 @@ const nuevoEspacioTrabajo = async (req, res) => {
 
     const imageUrl = result.secure_url
 
-    const {
-      titulo,
-      descripcion,
-      ubicacion,
-      capacidad,
-      precioDia,
-      direccion,
-      imagenReferencia,
-    } = req.body
+    const { titulo, descripcion, ubicacion, capacidad, precioDia, direccion } =
+      req.body
+
+    //validamos los campos del req.body
+    if (
+      !titulo ||
+      !descripcion ||
+      !ubicacion ||
+      !capacidad ||
+      !precioDia ||
+      !direccion
+    ) {
+      return res.status(400).json({
+        mensaje: 'Todos los campos son obligatorios',
+      })
+    }
 
     //validamos que no exista otro espacio de trabajo con el mismo nombre
     const existeEspacioTrabajo = await EspacioTrabajo.findOne({
@@ -138,14 +175,14 @@ const nuevoEspacioTrabajo = async (req, res) => {
 const editarEspacioTrabajo = async (req, res) => {
   try {
     const { espacioId } = req.params
-    const {
-      titulo,
-      descripcion,
-      ubicacion,
-      capacidad,
-      precioDia,
-      imagenReferencia,
-    } = req.body
+    const { titulo, descripcion, ubicacion, capacidad, precioDia } = req.body
+
+    //validamos los campos que llegan del req.body
+    if (!titulo || !descripcion || !ubicacion || !capacidad || !precioDia) {
+      return res.status(400).json({
+        mensaje: 'Todos los campos son obligatorios',
+      })
+    }
 
     if (!req.file) {
       return res
@@ -195,6 +232,14 @@ const editarEspacioTrabajo = async (req, res) => {
 
 const eliminarEspacioTrabajo = async (req, res) => {
   const espacioId = req.params.espacioId
+  ///validacion del ID para que sea como el ID de Mongoose
+  if (!mongoose.isValidObjectId(espacioId)) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'ID no válido',
+    })
+  }
+
   const espacioEliminado = await EspacioTrabajo.findByIdAndDelete(espacioId)
   if (!espacioEliminado) {
     return res.status(400).json({
@@ -221,6 +266,7 @@ const eliminarEspacioTrabajo = async (req, res) => {
 }
 module.exports = {
   obtenerSeisEspaciosTrabajo,
+  obtenerEspacioTrabajoID,
   obtenerEspaciosTrabajoMapa,
   obtenerEspaciosTrabajo,
   nuevoEspacioTrabajo,
