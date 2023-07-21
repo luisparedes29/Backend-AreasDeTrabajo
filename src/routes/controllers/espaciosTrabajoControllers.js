@@ -8,9 +8,21 @@ const mongoose = require('mongoose')
 const obtenerEspacioTrabajoID = async (req, res) => {
   try {
     //validacion del ID para que sea como el ID de Mongoose
-    if (!mongoose.Types.ObjectId.isValid(req.params.espacioId))
+    if (!mongoose.Types.ObjectId.isValid(req.params.espacioId)) {
       return res.status(400).json({ error: 'ID no válido' })
-    const espacioTrabajo = await EspacioTrabajo.findById(req.params.id)
+    }
+
+    const espacioTrabajo = await EspacioTrabajo.findById(req.params.espacioId)
+      .populate({
+        path: 'reservaciones',
+        populate: {
+          path: 'usuarioId',
+          select: 'nombre email',
+        },
+        select: '-__v',
+      })
+      .select('-__v')
+
     return res.json({ ok: true, espacioTrabajo: espacioTrabajo })
   } catch (error) {
     console.error('Error al obtener el espacio de trabajo:', error)
