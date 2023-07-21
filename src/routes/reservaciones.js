@@ -14,7 +14,7 @@ router
   .get('/:espacioId', obtenerReservacionesPorEspacio)
   .get('/:usuarioId', obtenerReservacionesPorUsuario)
   .post('/nuevaReservacion/:espacioId/:usuarioId', nuevaReservacion)
-  .delete('/eliminarReservacion/:espacioId', eliminarReservacion)
+  .delete('/eliminarReservacion/:reservacionId', eliminarReservacion)
 
 /**
  * @openapi
@@ -118,7 +118,7 @@ router
 
 /**
  * @openapi
- * /obtenerReservaciones:
+ * /reservaciones:
  *   get:
  *     tags:
  *       - Reservaciones
@@ -157,7 +157,7 @@ router
 
 /**
  * @openapi
- * /obtenerReservacionesPorEspacio/{espacioId}:
+ * /reservaciones/{espacioId}:
  *   get:
  *     tags:
  *       - Reservaciones
@@ -241,7 +241,7 @@ router
 
 /**
  * @openapi
- * /nuevaReservacion/{espacioId}/{usuarioId}:
+ * /reservaciones/nuevaReservacion/{espacioId}/{usuarioId}:
  *   post:
  *     tags:
  *       - Reservaciones
@@ -326,7 +326,7 @@ router
 
 /**
  * @openapi
- * /eliminarReservacion/{reservacionId}:
+ * /reservaciones/eliminarReservacion/{reservacionId}:
  *   delete:
  *     tags:
  *       - Reservaciones
