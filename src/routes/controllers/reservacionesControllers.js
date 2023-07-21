@@ -16,6 +16,9 @@ const obtenerReservaciones = async (req, res) => {
         select: 'titulo descripcion direccion capacidad precioDia',
       }) // Trae los datos del espacio de trabajo relacionado
       .select('-__v')
+      .sort({
+        sort: -1,
+      })
 
     return res.status(200).json({ ok: true, reservaciones: reservaciones })
   } catch (error) {
