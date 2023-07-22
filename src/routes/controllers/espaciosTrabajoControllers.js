@@ -134,10 +134,20 @@ const nuevoEspacioTrabajo = async (req, res) => {
     const existeEspacioTrabajo = await EspacioTrabajo.findOne({
       titulo,
     })
+
     if (existeEspacioTrabajo) {
       return res.status(400).json({
         mensaje: 'Ya existe un espacio de trabajo con ese nombre',
       })
+    }
+    // validacion para que sean numeros en capacidad y precio dia
+    if (isNaN(capacidad) || isNaN(precioDia)) {
+      return res.status(400).json({ error: 'La capacidad y el precio deben ser valores numéricos' })
+    }
+
+    // validacion para que no incluyan numeros igual a cero o menos
+    if (capacidad <= 0 || precioDia <= 0) {
+      return res.status(400).json({ error: 'La capacidad y el precio deben ser mayores que cero' })
     }
 
     const nuevoEspacioTrabajo = {
@@ -182,6 +192,21 @@ const editarEspacioTrabajo = async (req, res) => {
       return res.status(400).json({
         mensaje: 'Todos los campos son obligatorios',
       })
+    }
+    //validamos que no exista otro espacio de trabajo con el mismo nombre
+    const otroEspacioConMismoTitulo = await EspacioTrabajo.findOne({ titulo })
+    if (otroEspacioConMismoTitulo && otroEspacioConMismoTitulo._id.toString() !== espacioId) {
+      return res.status(400).json({ error: 'Ya existe otro espacio de trabajo con el mismo título' })
+    }
+
+    // validacion para que sean numeros en capacidad y precio dia
+    if (isNaN(capacidad) || isNaN(precioDia)) {
+      return res.status(400).json({ error: 'La capacidad y el precio deben ser valores numéricos' })
+    }
+
+    // validacion para que no incluyan numeros igual a cero o menos
+    if (capacidad <= 0 || precioDia <= 0) {
+      return res.status(400).json({ error: 'La capacidad y el precio deben ser mayores a cero' })
     }
 
     if (!req.file) {

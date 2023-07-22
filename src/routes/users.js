@@ -2,6 +2,45 @@ const express = require('express')
 const { registerUser, loginUser } = require('../routes/controllers/usuariosControllers')
 const router = express.Router()
 
+
+// Ruta para registrar admin
+router
+  .post('/signup', registerUser)
+
+  // Ruta para iniciar sesion
+  .post('/login', loginUser)
+
+// Esquema de usuarios Swagger
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     Usuarios:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           example: 61dbae02c1474e28863cdb7bd402b2d6
+ *         admin:
+ *           type: boolean
+ *           example: false
+ *         nombre:
+ *           type: string
+ *           example: John Doe
+ *         email:
+ *           type: string
+ *           example: johndoe@example.com
+ *         password:
+ *           type: string
+ *           example: password123
+ *         reservaciones:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Reservaciones'
+ */
+
+
+// Endpoints documentados correspondiente a los usuarios Swagger
 /**
  * @openapi
  * /users/signup:
@@ -123,11 +162,6 @@ const router = express.Router()
  */
 
 
-// Ruta para registrar admin
-router
-  .post('/signup', registerUser)
 
-  // Ruta para iniciar sesion
-  .post('/login', loginUser)
 
 module.exports = router

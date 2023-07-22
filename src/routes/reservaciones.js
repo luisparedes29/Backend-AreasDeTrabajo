@@ -16,33 +16,12 @@ router
   .post('/nuevaReservacion/:espacioId/:usuarioId', nuevaReservacion)
   .delete('/eliminarReservacion/:reservacionId', eliminarReservacion)
 
+
+// Rutas para el esquema de reservaciones Swagger
 /**
  * @openapi
  * components:
  *   schemas:
- *     Usuarios:
- *       type: object
- *       properties:
- *         _id:
- *           type: string
- *           example: 61dbae02-c147-4e28-863c-db7bd402b2d6
- *         admin:
- *           type: boolean
- *           example: false
- *         nombre:
- *           type: string
- *           example: John Doe
- *         email:
- *           type: string
- *           example: johndoe@example.com
- *         password:
- *           type: string
- *           example: password123
- *         reservaciones:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/Reservaciones'
- *
  *     Reservaciones:
  *       type: object
  *       properties:
@@ -75,47 +54,11 @@ router
  *         precioTotal:
  *           type: number
  *           example: 500.00
- *
- *     EspacioTrabajo:
- *       type: object
- *       properties:
- *         _id:
- *           type: string
- *           example: 61dbae02-c147-4e28-863c-db7bd402b2d6
- *         descripcion:
- *           type: string
- *           example: Espacio de trabajo acogedor
- *         ubicacion:
- *           type: object
- *           properties:
- *             latitud:
- *               type: number
- *               example: 37.7749
- *             longitud:
- *               type: number
- *               example: -122.4194
- *         capacidad:
- *           type: number
- *           example: 10
- *         precioDia:
- *           type: number
- *           example: 50.0
- *         imagenReferencia:
- *           type: string
- *           format: uri
- *           example: https://res.cloudinary.com/dhdm4ter5/image/upload/v1689835829/jkwprgjszmehbqa9g8nx.jpg
- *         reservaciones:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/Reservaciones'
- *         vecesReservado:
- *           type: number
- *           example: 3
- *         rendimientoEconomico:
- *           type: number
- *           example: 150.0
  */
 
+
+
+// Endpoints documentados correspondiente a las reservaciones Swagger
 /**
  * @openapi
  * /reservaciones:
