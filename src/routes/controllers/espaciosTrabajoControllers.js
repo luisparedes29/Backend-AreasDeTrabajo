@@ -1,6 +1,6 @@
-const EspacioTrabajo = require('../../models/espacioTrabajo')
-const Reservaciones = require('../../models/reservaciones')
-const Usuarios = require('../../models/usuarios')
+const WorkSpace = require('../../models/espacioTrabajo')
+const Reservations = require('../../models/reservaciones')
+const Users = require('../../models/usuarios')
 const cloudinary = require('../../utilities/cloudinary')
 const mongoose = require('mongoose')
 
@@ -12,7 +12,7 @@ const obtenerEspacioTrabajoID = async (req, res) => {
       return res.status(400).json({ error: 'ID no válido' })
     }
 
-    const espacioTrabajo = await EspacioTrabajo.findById(req.params.espacioId)
+    const espacioTrabajo = await WorkSpace.findById(req.params.espacioId)
       .populate({
         path: 'reservaciones',
         populate: {
@@ -36,7 +36,7 @@ const obtenerEspacioTrabajoID = async (req, res) => {
 // funcion para obtener solo 6 espacios de trabajo
 const obtenerSeisEspaciosTrabajo = async (req, res) => {
   try {
-    const espaciosTrabajo = await EspacioTrabajo.find().limit(6)
+    const espaciosTrabajo = await WorkSpace.find().limit(6)
     return res.json({ ok: true, espaciosTrabajo: espaciosTrabajo })
   } catch (error) {
     console.error('Error al obtener los espacios de trabajo:', error)
@@ -51,7 +51,7 @@ const obtenerSeisEspaciosTrabajo = async (req, res) => {
 
 const obtenerEspaciosTrabajoMapa = async (req, res) => {
   try {
-    const espaciosTrabajo = await EspacioTrabajo.find().select(
+    const espaciosTrabajo = await WorkSpace.find().select(
       'titulo descripcion ubicacion precioDia'
     )
     return res.json({ ok: true, espaciosTrabajo: espaciosTrabajo })
@@ -73,8 +73,8 @@ const obtenerEspaciosTrabajo = async (req, res) => {
 
     const skip = (pagina - 1) * limit // Calcular el número de documentos a saltar
 
-    const espaciosTrabajoConteo = await EspacioTrabajo.countDocuments()
-    const espaciosTrabajo = await EspacioTrabajo.find()
+    const espaciosTrabajoConteo = await WorkSpace.countDocuments()
+    const espaciosTrabajo = await WorkSpace.find()
       .skip(skip)
       .limit(limit)
       .select('titulo imagenReferencia precioDia direccion')
@@ -107,7 +107,7 @@ const searchEspaciosTrabajo = async (req, res) => {
         .json({ error: 'No se proporcionó una palabra clave' });
     }
 
-    const espaciosTrabajo = await EspacioTrabajo.find({
+    const espaciosTrabajo = await WorkSpace.find({
       $or: [
         { titulo: { $regex: palabraClave, $options: 'i' } },
         { descripcion: { $regex: palabraClave, $options: 'i' } },
@@ -155,7 +155,7 @@ const nuevoEspacioTrabajo = async (req, res) => {
     }
 
     //validamos que no exista otro espacio de trabajo con el mismo nombre
-    const existeEspacioTrabajo = await EspacioTrabajo.findOne({
+    const existeEspacioTrabajo = await WorkSpace.findOne({
       titulo,
     })
 
@@ -218,7 +218,7 @@ const editarEspacioTrabajo = async (req, res) => {
       })
     }
     //validamos que no exista otro espacio de trabajo con el mismo nombre
-    const otroEspacioConMismoTitulo = await EspacioTrabajo.findOne({ titulo })
+    const otroEspacioConMismoTitulo = await WorkSpace.findOne({ titulo })
     if (otroEspacioConMismoTitulo && otroEspacioConMismoTitulo._id.toString() !== espacioId) {
       return res.status(400).json({ error: 'Ya existe otro espacio de trabajo con el mismo título' })
     }
@@ -246,7 +246,7 @@ const editarEspacioTrabajo = async (req, res) => {
 
     const imageUrl = result.secure_url
 
-    const EspacioTrabajoEditado = await EspacioTrabajo.findByIdAndUpdate(
+    const EspacioTrabajoEditado = await WorkSpace.findByIdAndUpdate(
       espacioId,
       {
         titulo,
@@ -289,7 +289,7 @@ const eliminarEspacioTrabajo = async (req, res) => {
     })
   }
 
-  const espacioEliminado = await EspacioTrabajo.findByIdAndDelete(espacioId)
+  const espacioEliminado = await WorkSpace.findByIdAndDelete(espacioId)
   if (!espacioEliminado) {
     return res.status(400).json({
       ok: false,
@@ -298,11 +298,11 @@ const eliminarEspacioTrabajo = async (req, res) => {
   }
   //eliminar reservaciones que tengan este espacio de trabajo
 
-  await Reservaciones.deleteMany({ espacioId })
+  await Reservations.deleteMany({ espacioId })
 
   //eliminar reservaciones de los usuarios
 
-  await Usuarios.updateMany(
+  await Users.updateMany(
     { reservaciones: espacioId },
     { $pull: { reservaciones: espacioId } }
   )

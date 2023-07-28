@@ -1,16 +1,16 @@
-const Reservaciones = require('../../models/reservaciones')
-const EspacioTrabajo = require('../../models/espacioTrabajo')
+const Reservations = require('../../models/reservaciones')
+const WorkSpace = require('../../models/espacioTrabajo')
 const moment = require('moment')
-const Usuarios = require('../../models/usuarios')
+const Users = require('../../models/usuarios')
 
-const obtenerReservaciones = async (req, res) => {
+const getReservations = async (req, res) => {
   try {
     // Obtener todas las reservaciones y sus datos de espacio de trabajo
-    const reservaciones = await Reservaciones.find()
-      .populate('usuarioId') // Trae los datos del usuario relacionado
-      .populate('espacioId') // Trae los datos del espacio de trabajo relacionado
+    const reservations = await Reservations.find()
+      .populate('userId') // Trae los datos del usuario relacionado
+      .populate('spaceId') // Trae los datos del espacio de trabajo relacionado
 
-    return res.status(200).json({ ok: true, reservaciones: reservaciones })
+    return res.status(200).json({ ok: true, reservations: reservations })
   } catch (error) {
     console.error('Error al obtener reservaciones:', error)
     return res
@@ -19,16 +19,16 @@ const obtenerReservaciones = async (req, res) => {
   }
 }
 
-const obtenerReservacionesPorEspacio = async (req, res) => {
+const getReservationBySpace = async (req, res) => {
   try {
-    const espacioId = req.params.espacioId
+    const spaceId = req.params.spaceId
 
     // Obtener las reservaciones del espacio de trabajo especificado y realizar el populate
-    const reservaciones = await Reservaciones.find({ espacioId })
-      .populate('espacioId')
-      .populate('usuarioId')
+    const reservations = await Reservations.find({ spaceId })
+      .populate('spaceId')
+      .populate('userId')
 
-    return res.status(200).json({ ok: true, reservaciones: reservaciones })
+    return res.status(200).json({ ok: true, reservations: reservations })
   } catch (error) {
     console.error(
       'Error al obtener las reservaciones por espacio de trabajo:',
@@ -40,16 +40,16 @@ const obtenerReservacionesPorEspacio = async (req, res) => {
   }
 }
 
-const obtenerReservacionesPorUsuario = async (req, res) => {
+const getReservationByUser = async (req, res) => {
   try {
-    const usuarioId = req.params.usuarioId
+    const userId = req.params.userId
 
     // Obtener las reservaciones realizadas por el usuario especificado y realizar el populate
-    const reservaciones = await Reservaciones.find({ usuarioId }).populate(
-      'espacioId'
+    const reservations = await Reservations.find({ userId }).populate(
+      'spaceId'
     )
 
-    return res.status(200).json({ ok: true, reservaciones: reservaciones })
+    return res.status(200).json({ ok: true, reservations: reservations })
   } catch (error) {
     console.error('Error al obtener las reservaciones por usuario:', error)
     return res
@@ -59,107 +59,107 @@ const obtenerReservacionesPorUsuario = async (req, res) => {
 }
 
 // Ruta para crear una nueva reservación
-const nuevaReservacion = async (req, res) => {
+const createReservation = async (req, res) => {
   try {
-    const { fechaInicio, fechaFin, detalles, horaInicio, horaFin } = req.body
-    const espacioId = req.params.espacioId
-    const usuarioId = req.params.usuarioId
+    const { startDate, endDate, details, startTime, endTime } = req.body
+    const spaceId = req.params.spaceId
+    const userId = req.params.userId
 
     // Generar el array de fechas dentro del rango
-    const fechasReservacion = []
-    const currentDate = moment(fechaInicio)
-    const endDate = moment(fechaFin)
-    const horaInicioDate = moment(horaInicio, 'HH:mm').toDate()
-    const horaFinDate = moment(horaFin, 'HH:mm').toDate()
+    const reservationDates = []
+    const currentDate = moment(startDate)
+    const endingDate = moment(endDate)
+    const startTimeDate = moment(startTime, 'HH:mm').toDate()
+    const endTimeDate = moment(endTime, 'HH:mm').toDate()
 
-    while (currentDate.isSameOrBefore(endDate, 'day')) {
-      fechasReservacion.push(currentDate.toDate())
+    while (currentDate.isSameOrBefore(endingDate, 'day')) {
+      reservationDates.push(currentDate.toDate())
       currentDate.add(1, 'day')
     }
 
     // Verificar si alguna de las fechas ya está reservada
-    const reservacionesExistentes = await Reservaciones.find({
-      espacioId,
-      $or: fechasReservacion.map((fecha) => ({
-        'fechaInicioYFinal.fechaInicio': { $lte: fecha },
-        'fechaInicioYFinal.fechaFin': { $gte: fecha },
+    const existingReservations = await Reservations.find({
+      spaceId,
+      $or: reservationDates.map((date) => ({
+        'startAndEndDate.startDate': { $lte: date },
+        'startAndEndDate.endDate': { $gte: date },
         $or: [
           {
             $and: [
-              { 'horaInicioYFinal.horaInicio': { $lte: horaInicioDate } },
-              { 'horaInicioYFinal.horaFin': { $gt: horaInicioDate } },
+              { 'startAndEndTime.startTime': { $lte: startTimeDate } },
+              { 'startAndEndTime.endTime': { $gt: startTimeDate } },
             ],
           },
           {
             $and: [
-              { 'horaInicioYFinal.horaInicio': { $lt: horaFinDate } },
-              { 'horaInicioYFinal.horaFin': { $gte: horaFinDate } },
+              { 'startAndEndTime.startTime': { $lt: endTimeDate } },
+              { 'startAndEndTime.endTime': { $gte: endTimeDate } },
             ],
           },
           {
             $and: [
-              { 'horaInicioYFinal.horaInicio': { $gte: horaInicioDate } },
-              { 'horaInicioYFinal.horaFin': { $lte: horaFinDate } },
+              { 'startAndEndTime.startTime': { $gte: startTimeDate } },
+              { 'startAndEndTime.endTime': { $lte: endTimeDate} },
             ],
           },
         ],
       })),
     })
 
-    if (reservacionesExistentes.length > 0) {
+    if (existingReservations.length > 0) {
       return res
         .status(400)
         .json({ mensaje: 'Alguna de las fechas ya está reservada.' })
     }
 
     // Obtener el espacio de trabajo para obtener el costo por día y vecesReservado
-    const espacioTrabajo = await EspacioTrabajo.findById(espacioId)
+    const workSpace = await WorkSpace.findById(espacioId)
 
-    if (!espacioTrabajo) {
+    if (!workSpace) {
       return res
         .status(404)
         .json({ mensaje: 'Espacio de trabajo no encontrado.' })
     }
 
     // Calcular el número de días de la reservación
-    const numeroDias = fechasReservacion.length
+    const numberOfDays = reservationDates.length
 
     // Calcular el precio total de la reservación
-    const precioTotal = espacioTrabajo.precioDia * numeroDias
+    const totalPrice = espacioTrabajo.precioDia * numberOfDays
 
     // Crear la reservación con el array de fechas completo y el precio total
-    const nuevaReservacionData = {
-      usuarioId,
-      espacioId,
-      validacionFechasReservacion: fechasReservacion,
-      fechaInicioYFinal: { fechaInicio, fechaFin },
-      horaInicioYFinal: {
-        horaInicio: horaInicioDate,
-        horaFin: horaFinDate,
+    const newReservationData = {
+      userId,
+      spaceId,
+      validateReservationDates: reservationDates,
+      startAndEndDate: { startDate, endDate },
+      startAndEndTime: {
+        startTime: startTimeDate,
+        endTime: endTimeDate,
       },
-      detalles,
-      precioTotal,
+      details,
+      totalPrice,
     }
 
-    const nuevaReservacion = await Reservaciones.create(nuevaReservacionData)
+    const newReservation = await Reservations.create(newReservationData)
 
     // Agregar el ID de la reserva en el arreglo de reservaciones del espacio de trabajo y actualizar vecesReservado y rendimientoEconomico
-    await EspacioTrabajo.findByIdAndUpdate(
-      espacioId,
+    await WorkSpace.findByIdAndUpdate(
+      spaceId,
       {
-        $push: { reservaciones: nuevaReservacion._id },
-        $inc: { vecesReservado: 1, rendimientoEconomico: precioTotal },
+        $push: { reservations: newReservation._id },
+        $inc: { timesReserved: 1, economicPerformance: totalPrice },
       },
       { new: true }
     )
 
-    await Usuarios.findByIdAndUpdate(
-      usuarioId,
-      { $push: { reservaciones: nuevaReservacion._id } },
+    await Users.findByIdAndUpdate(
+      userId,
+      { $push: { reservations: newReservation._id } },
       { new: true }
     )
 
-    return res.status(201).json({ ok: true, reservacion: nuevaReservacion })
+    return res.status(201).json({ ok: true, reservation: newReservation })
   } catch (error) {
     console.error('Error al crear reservación:', error)
     return res
@@ -168,28 +168,28 @@ const nuevaReservacion = async (req, res) => {
   }
 }
 
-const eliminarReservacion = async (req, res) => {
+const deleteReservation = async (req, res) => {
   try {
-    const reservacionId = req.params.reservacionId
+    const reservationId = req.params.reservationId
 
     // Buscar y eliminar la reserva por su ID utilizando findByIdAndDelete
-    const reservacionEliminada = await Reservaciones.findByIdAndDelete(
-      reservacionId
+    const deletedReservation = await Reservations.findByIdAndDelete(
+      reservationId
     )
 
-    if (!reservacionEliminada) {
+    if (!deletedReservation) {
       return res.status(404).json({ mensaje: 'Reservación no encontrada.' })
     }
 
     // Eliminar la referencia de la reserva en el espacio de trabajo utilizando findByIdAndUpdate
-    const espacioTrabajoId = reservacionEliminada.espacioId
-    await EspacioTrabajo.findByIdAndUpdate(espacioTrabajoId, {
-      $pull: { reservaciones: reservacionId },
+    const workSpaceId = deletedReservation.spaceId
+    await WorkSpace.findByIdAndUpdate(workSpaceId, {
+      $pull: { reservations: reservationId },
     })
 
     return res.status(200).json({
       ok: true,
-      _id: reservacionId,
+      _id: reservationId,
     })
   } catch (error) {
     console.error('Error al eliminar reservación:', error)
@@ -200,9 +200,9 @@ const eliminarReservacion = async (req, res) => {
 }
 
 module.exports = {
-  obtenerReservaciones,
-  obtenerReservacionesPorEspacio,
-  obtenerReservacionesPorUsuario,
-  nuevaReservacion,
-  eliminarReservacion,
+  getReservations,
+  getReservationBySpace,
+  getReservationByUser,
+  createReservation,
+  deleteReservation,
 }

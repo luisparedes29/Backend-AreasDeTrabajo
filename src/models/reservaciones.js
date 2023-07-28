@@ -1,46 +1,46 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const reservacionSchema = new Schema({
-  usuarioId: {
+const reservationSchema = new Schema({
+  userId: {
     type: Schema.Types.ObjectId,
     ref: 'Usuarios',
     required: true,
   },
-  espacioId: {
+  spaceId: {
     type: Schema.Types.ObjectId,
     ref: 'EspacioTrabajo',
     required: true,
   },
-  fechaInicioYFinal: {
-    fechaInicio: {
+  startAndEndDate: {
+    startDate: {
       type: Date,
       required: true,
     },
-    fechaFin: {
-      type: Date,
-      required: true,
-    },
-  },
-  horaInicioYFinal: {
-    horaInicio: {
-      type: Date,
-      required: true,
-    },
-    horaFin: {
+    endDate: {
       type: Date,
       required: true,
     },
   },
-  detalles: {
+  startAndEndTime: {
+    startTime: {
+      type: Date,
+      required: true,
+    },
+    endTime: {
+      type: Date,
+      required: true,
+    },
+  },
+  details: {
     type: String,
   },
-  precioTotal: {
+  totalPrice: {
     type: Number,
     required: true,
   },
 })
 
-const Reservaciones = mongoose.model('Reservaciones', reservacionSchema)
+const Reservations = mongoose.model('Reservaciones', reservationSchema)
 
-module.exports = Reservaciones
+module.exports = Reservations

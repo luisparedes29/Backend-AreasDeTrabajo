@@ -1,12 +1,12 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const usuariosSchema = new Schema({
+const usersSchema = new Schema({
   admin: {
     type: Boolean,
     default: false,
   },
-  nombre: {
+  name: {
     type: String,
     required: true,
   },
@@ -18,7 +18,7 @@ const usuariosSchema = new Schema({
     type: String,
     required: true,
   },
-  reservaciones: [
+  reservations: [
     {
       type: Schema.Types.ObjectId,
       ref: 'Reservaciones',
@@ -26,6 +26,6 @@ const usuariosSchema = new Schema({
   ],
 })
 
-const Usuarios = mongoose.model('Usuarios', usuariosSchema)
+const Users = mongoose.model('Usuarios', usersSchema)
 
-module.exports = Usuarios
+module.exports = Users

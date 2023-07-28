@@ -1,11 +1,11 @@
 const bcrypt = require('bcrypt');
-const Usuarios = require('../../models/usuarios');
+const Users = require('../../models/usuarios');
 const { createToken } = require('./jwtCreate');
 
 const registerUser = async (req, res) => {
     try {
-        const { nombre, email, password, admin } = req.body;
-        if (!nombre || !email || !password) {
+        const { name, email, password, admin } = req.body;
+        if (!name || !email || !password) {
             return res.status(400).json({ error: 'El nombre, correoo electrónico y la contraseña son requeridos.' });
         }
 
@@ -14,8 +14,8 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ error: 'El correo electrónico ingresado no es válido. Por favor ingrese un correo electronico con el formato adecuado.' });
         }
 
-        const correoExistente = await Usuarios.findOne({ email });
-        if (correoExistente) {
+        const existingEmail = await Users.findOne({ email });
+        if (existingEmail) {
             return res.status(400).json({ error: 'El correo electrónico ya existe. Por favor escoja otro.' });
         }
 
@@ -25,13 +25,13 @@ const registerUser = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await Usuarios.create({
-            nombre,
+        const user = await Users.create({
+            name,
             email,
             password: hashedPassword,
             admin: admin || false
         });
-        let token = createToken({ id: user._id, nombre: user.nombre, email: user.email, admin: user.admin });
+        let token = createToken({ id: user._id, name: user.name, email: user.email, admin: user.admin });
         res.status(200).json({ token, email: user.email, admin: user.admin });
     } catch (error) {
         console.log(error);
@@ -49,7 +49,7 @@ const loginUser = async (req, res) => {
         if (!email || !password) {
             return res.status(400).json({ error: 'El correo electrónico y la contraseña son requeridos para iniciar sesión' });
         }
-        const user = await Usuarios.findOne({ email });
+        const user = await Users.findOne({ email });
         if (!user) {
             return res.status(400).json({ error: 'El correo electrónico ingresado no existe' });
         }
@@ -57,7 +57,7 @@ const loginUser = async (req, res) => {
         if (!isPasswordValid) {
             return res.status(400).json({ error: 'La contraseña es incorrecta' });
         }
-        let token = createToken({ id: user._id, nombre: user.nombre, email: user.email, admin: user.admin });
+        let token = createToken({ id: user._id, name: user.name, email: user.email, admin: user.admin });
         res.status(200).json({ token, email: user.email, admin: user.admin });
     } catch (error) {
         console.log(error);
@@ -67,7 +67,7 @@ const loginUser = async (req, res) => {
 
 const getUsers = async (req, res) => {
     try {
-        const allUsers = await Usuarios.find({}, { __v: 0 });
+        const allUsers = await Users.find({}, { __v: 0 });
         res.status(200).json(allUsers);
     } catch (error) {
         console.log(error)
@@ -80,7 +80,7 @@ const getUserById = async (req, res) => {
     const userId = req.params.id; 
   
     try {
-      const user = await Usuarios.findById(userId);
+      const user = await Users.findById(userId);
       if (user) {
         res.status(200).json(user);
       } else {
@@ -101,7 +101,7 @@ const getUserById = async (req, res) => {
         updatedUserData.password = await bcrypt.hash(updatedUserData.password, 10);
       }
   
-      const updatedUser = await Usuarios.findByIdAndUpdate(userId, updatedUserData, { new: true });
+      const updatedUser = await Users.findByIdAndUpdate(userId, updatedUserData, { new: true });
   
       if (updatedUser) {
         res.status(200).json(updatedUser);
@@ -118,7 +118,7 @@ const getUserById = async (req, res) => {
     const userId = req.params.id; 
   
     try {
-      const deletedUser = await Usuarios.findByIdAndRemove(userId);
+      const deletedUser = await Users.findByIdAndRemove(userId);
   
       if (deletedUser) {
         res.status(200).json({ message: 'Usuario eliminado con éxito.' });

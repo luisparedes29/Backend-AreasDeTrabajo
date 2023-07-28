@@ -1,56 +1,56 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const espacioTrabajoSchema = new Schema({
-  titulo: {
+const workSpaceSchema = new Schema({
+  title: {
     type: String,
     required: true,
   },
-  descripcion: {
+  description: {
     type: String,
     required: true,
   },
-  direccion: {
+  address: {
     type: String,
     required: true,
   },
-  ubicacion: {
-    latitud: {
+  location: {
+    latitude: {
       type: Number,
       required: true,
     },
-    longitud: {
+    longitude: {
       type: Number,
       required: true,
     },
   },
-  capacidad: {
+  capacity: {
     type: Number,
     required: true,
   },
-  precioDia: {
+  pricePerDay: {
     type: Number,
     required: true,
   },
-  imagenReferencia: {
+  referenceImage: {
     type: String,
   },
-  reservaciones: [
+  reservations: [
     {
       type: Schema.Types.ObjectId,
       ref: 'Reservaciones',
     },
   ], // Referencia a las reservaciones
-  vecesReservado: {
+  timesReserved: {
     type: Number,
     default: 0,
   },
-  rendimientoEconomico: {
+  economicPerformance: {
     type: Number,
     default: 0,
   },
 })
 
-const EspacioTrabajo = mongoose.model('EspacioTrabajo', espacioTrabajoSchema)
+const WorkSpace = mongoose.model('EspacioTrabajo', workSpaceSchema)
 
-module.exports = EspacioTrabajo
+module.exports = WorkSpace
