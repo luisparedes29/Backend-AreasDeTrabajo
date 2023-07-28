@@ -16,11 +16,11 @@ const espacioTrabajoSchema = new Schema({
   },
   ubicacion: {
     latitud: {
-      type: Number,
+      type: Schema.Types.Decimal128,
       required: true,
     },
     longitud: {
-      type: Number,
+      type: Schema.Types.Decimal128,
       required: true,
     },
   },
