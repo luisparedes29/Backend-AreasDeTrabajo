@@ -97,6 +97,30 @@ const obtenerEspaciosTrabajo = async (req, res) => {
   }
 }
 
+const searchEspaciosTrabajo = async (req, res) => {
+  try {
+    const { palabraClave } = req.body;
+
+    if (!palabraClave) {
+      return res
+        .status(400)
+        .json({ error: 'No se proporcionó una palabra clave' });
+    }
+
+    const espaciosTrabajo = await EspacioTrabajo.find({
+      $or: [
+        { titulo: { $regex: palabraClave, $options: 'i' } },
+        { descripcion: { $regex: palabraClave, $options: 'i' } },
+        { direccion: { $regex: palabraClave, $options: 'i' } },
+      ],
+    });
+
+    res.json(espaciosTrabajo);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 //funcion para crear un nuevo espacio de trabajo
 const nuevoEspacioTrabajo = async (req, res) => {
   try {
@@ -297,4 +321,5 @@ module.exports = {
   nuevoEspacioTrabajo,
   editarEspacioTrabajo,
   eliminarEspacioTrabajo,
+  searchEspaciosTrabajo
 }

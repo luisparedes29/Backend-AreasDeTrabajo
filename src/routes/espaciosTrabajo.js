@@ -10,6 +10,7 @@ const {
   nuevoEspacioTrabajo,
   editarEspacioTrabajo,
   eliminarEspacioTrabajo,
+  searchEspaciosTrabajo
 } = require('./controllers/espaciosTrabajoControllers')
 
 router
@@ -24,6 +25,7 @@ router
     editarEspacioTrabajo
   )
   .delete('/eliminar/:espacioId', eliminarEspacioTrabajo)
+  .get('/buscar/', searchEspaciosTrabajo)
 
 
 // Esquema de espacios de trabajo Swagger
