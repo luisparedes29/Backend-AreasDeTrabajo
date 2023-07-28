@@ -1,7 +1,13 @@
 const express = require('express')
-const { registerUser, loginUser, getUsers, getUserById, updateUserById , deleteUserById } = require('../routes/controllers/usuariosControllers')
+const {
+  registerUser,
+  loginUser,
+  getUsers,
+  getUserById,
+  updateUserById,
+  deleteUserById,
+} = require('../routes/controllers/usuariosControllers')
 const router = express.Router()
-
 
 // Ruta para registrar admin
 router
@@ -14,7 +20,7 @@ router
 
   .get('/getById/:id', getUserById)
 
-  .put ('/updateById/:id', updateUserById)	
+  .put('/updateById/:id', updateUserById)
 
   .delete('/deleteById/:id', deleteUserById)
 
@@ -46,7 +52,6 @@ router
  *           items:
  *             $ref: '#/components/schemas/Reservaciones'
  */
-
 
 // Endpoints documentados correspondiente a los usuarios Swagger
 /**
@@ -110,7 +115,7 @@ router
  *                 error:
  *                   type: string
  *                   description: Mensaje de error.
- * 
+ *
  * /users/login:
  *   post:
  *     tags:
@@ -167,9 +172,102 @@ router
  *                 error:
  *                   type: string
  *                   description: Mensaje de error.
+ *
+ * /users/all:
+ *   get:
+ *     summary: Obtener todos los usuarios
+ *     tags: [Usuarios]
+ *     responses:
+ *       200:
+ *         description: Lista de todos los usuarios
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Usuario'
+ *       500:
+ *         description: Error en el servidor
+ *
+ * /users/getById/{id}:
+ *   get:
+ *     summary: Obtener un usuario por su ID
+ *     tags: [Usuarios]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         description: ID del usuario a obtener
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Datos del usuario
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Usuario'
+ *       404:
+ *         description: Usuario no encontrado
+ *       500:
+ *         description: Error en el servidor
+ *
+ * /users/updateById/{id}:
+ *   put:
+ *     summary: Actualizar un usuario por su ID
+ *     tags: [Usuarios]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         description: ID del usuario a actualizar
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       description: Datos del usuario a actualizar
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UsuarioUpdate'
+ *     responses:
+ *       200:
+ *         description: Usuario actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Usuario'
+ *       404:
+ *         description: Usuario no encontrado
+ *       500:
+ *         description: Error en el servidor
+ *
+ * /users/deleteById/{id}:
+ *   delete:
+ *     summary: Eliminar un usuario por su ID
+ *     tags: [Usuarios]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         description: ID del usuario a eliminar
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Usuario eliminado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Mensaje de éxito al eliminar el usuario
+ *       404:
+ *         description: Usuario no encontrado
+ *       500:
+ *         description: Error en el servidor
  */
-
-
-
 
 module.exports = router
