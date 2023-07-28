@@ -185,7 +185,7 @@ router
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Usuario'
+ *                 $ref: '#/components/schemas/Usuarios'
  *       500:
  *         description: Error en el servidor
  *
@@ -206,7 +206,7 @@ router
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Usuario'
+ *               $ref: '#/components/schemas/Usuarios'
  *       404:
  *         description: Usuario no encontrado
  *       500:
@@ -229,14 +229,14 @@ router
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UsuarioUpdate'
+ *             $ref: '#/components/schemas/Usuarios'
  *     responses:
  *       200:
  *         description: Usuario actualizado exitosamente
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Usuario'
+ *               $ref: '#/components/schemas/Usuarios'
  *       404:
  *         description: Usuario no encontrado
  *       500:
