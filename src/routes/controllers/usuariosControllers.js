@@ -65,4 +65,71 @@ const loginUser = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser };
+const getUsers = async (req, res) => {
+    try {
+        const allUsers = await Usuarios.find({}, { __v: 0 });
+        res.status(200).json(allUsers);
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ error: 'Ocurrió un error al recuperar todos los usuarios.' });
+    }
+};
+
+
+const getUserById = async (req, res) => {
+    const userId = req.params.id; 
+  
+    try {
+      const user = await Usuarios.findById(userId);
+      if (user) {
+        res.status(200).json(user);
+      } else {
+        res.status(404).json({ error: 'Usuario no encontrado.' });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: 'Ocurrió un error al recuperar el usuario' });
+    }
+  };
+  
+  const updateUserById = async (req, res) => {
+    const userId = req.params.id;
+    const updatedUserData = req.body;
+  
+    try {
+      if (updatedUserData.password) {
+        updatedUserData.password = await bcrypt.hash(updatedUserData.password, 10);
+      }
+  
+      const updatedUser = await Usuarios.findByIdAndUpdate(userId, updatedUserData, { new: true });
+  
+      if (updatedUser) {
+        res.status(200).json(updatedUser);
+      } else {
+        res.status(404).json({ error: 'Usuario no encontrado.' });
+      }
+    } catch (error) {
+      res.status(500).json({ error: 'Ocurrió un error al actualizar el usuario por su ID.' });
+    }
+  };
+  
+
+  const deleteUserById = async (req, res) => {
+    const userId = req.params.id; 
+  
+    try {
+      const deletedUser = await Usuarios.findByIdAndRemove(userId);
+  
+      if (deletedUser) {
+        res.status(200).json({ message: 'Usuario eliminado con éxito.' });
+      } else {
+        res.status(404).json({ error: 'Usuario no encontrado.' });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: 'Ocurrió un error al eliminar el usuario por su ID.' });
+    }
+  };
+
+
+module.exports = { registerUser, loginUser, getUsers, getUserById, deleteUserById, updateUserById};

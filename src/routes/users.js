@@ -1,5 +1,5 @@
 const express = require('express')
-const { registerUser, loginUser } = require('../routes/controllers/usuariosControllers')
+const { registerUser, loginUser, getUsers, getUserById, updateUserById , deleteUserById } = require('../routes/controllers/usuariosControllers')
 const router = express.Router()
 
 
@@ -9,6 +9,14 @@ router
 
   // Ruta para iniciar sesion
   .post('/login', loginUser)
+
+  .get('/all', getUsers)
+
+  .get('/getById/:id', getUserById)
+
+  .put ('/updateById/:id', updateUserById)	
+
+  .delete('/deleteById/:id', deleteUserById)
 
 // Esquema de usuarios Swagger
 /**
