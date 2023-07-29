@@ -7,8 +7,8 @@
 const app = require('../app')
 const debug = require('debug')('backend-areasdetrabajo:server')
 const http = require('http')
-const cluster = require('node:cluster')
-const numCPUs = require('node:os').availableParallelism()
+const cluster = require('cluster')
+const numCPUs = require('os').cpus().length
 
 /**
  * Get port from environment and store in Express.
@@ -91,7 +91,7 @@ if (cluster.isPrimary) {
     debug('Listening on ' + bind)
   }
 
-  server.listen(port)
+  server.listen(port, () => {})
   server.on('error', onError)
   server.on('listening', onListening)
 
