@@ -52,7 +52,7 @@ const obtenerSeisEspaciosTrabajo = async (req, res) => {
 const obtenerEspaciosTrabajoMapa = async (req, res) => {
   try {
     const espaciosTrabajo = await EspacioTrabajo.find().select(
-      'titulo descripcion ubicacion precioDia'
+      'titulo direccion imagenReferencia descripcion ubicacion precioDia'
     )
     return res.json({ ok: true, espaciosTrabajo: espaciosTrabajo })
   } catch (error) {
@@ -99,12 +99,12 @@ const obtenerEspaciosTrabajo = async (req, res) => {
 
 const searchEspaciosTrabajo = async (req, res) => {
   try {
-    const { palabraClave } = req.body;
+    const { palabraClave } = req.body
 
     if (!palabraClave) {
       return res
         .status(400)
-        .json({ error: 'No se proporcionó una palabra clave' });
+        .json({ error: 'No se proporcionó una palabra clave' })
     }
 
     const espaciosTrabajo = await EspacioTrabajo.find({
@@ -113,13 +113,13 @@ const searchEspaciosTrabajo = async (req, res) => {
         { descripcion: { $regex: palabraClave, $options: 'i' } },
         { direccion: { $regex: palabraClave, $options: 'i' } },
       ],
-    });
+    })
 
-    res.json(espaciosTrabajo);
+    res.json(espaciosTrabajo)
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message })
   }
-};
+}
 
 //funcion para crear un nuevo espacio de trabajo
 const nuevoEspacioTrabajo = async (req, res) => {
@@ -166,12 +166,16 @@ const nuevoEspacioTrabajo = async (req, res) => {
     }
     // validacion para que sean numeros en capacidad y precio dia
     if (isNaN(capacidad) || isNaN(precioDia)) {
-      return res.status(400).json({ error: 'La capacidad y el precio deben ser valores numéricos' })
+      return res
+        .status(400)
+        .json({ error: 'La capacidad y el precio deben ser valores numéricos' })
     }
 
     // validacion para que no incluyan numeros igual a cero o menos
     if (capacidad <= 0 || precioDia <= 0) {
-      return res.status(400).json({ error: 'La capacidad y el precio deben ser mayores que cero' })
+      return res
+        .status(400)
+        .json({ error: 'La capacidad y el precio deben ser mayores que cero' })
     }
 
     const nuevoEspacioTrabajo = {
@@ -217,26 +221,56 @@ const editarEspacioTrabajo = async (req, res) => {
         mensaje: 'Todos los campos son obligatorios',
       })
     }
+
     //validamos que no exista otro espacio de trabajo con el mismo nombre
     const otroEspacioConMismoTitulo = await EspacioTrabajo.findOne({ titulo })
-    if (otroEspacioConMismoTitulo && otroEspacioConMismoTitulo._id.toString() !== espacioId) {
-      return res.status(400).json({ error: 'Ya existe otro espacio de trabajo con el mismo título' })
+    if (
+      otroEspacioConMismoTitulo &&
+      otroEspacioConMismoTitulo._id.toString() !== espacioId
+    ) {
+      return res.status(400).json({
+        error: 'Ya existe otro espacio de trabajo con el mismo título',
+      })
     }
 
     // validacion para que sean numeros en capacidad y precio dia
     if (isNaN(capacidad) || isNaN(precioDia)) {
-      return res.status(400).json({ error: 'La capacidad y el precio deben ser valores numéricos' })
+      return res
+        .status(400)
+        .json({ error: 'La capacidad y el precio deben ser valores numéricos' })
     }
 
     // validacion para que no incluyan numeros igual a cero o menos
     if (capacidad <= 0 || precioDia <= 0) {
-      return res.status(400).json({ error: 'La capacidad y el precio deben ser mayores a cero' })
+      return res
+        .status(400)
+        .json({ error: 'La capacidad y el precio deben ser mayores a cero' })
     }
 
     if (!req.file) {
-      return res
-        .status(400)
-        .json({ error: 'No se proporcionó ningún archivo de imagen' })
+      const EspacioTrabajoEditado = await EspacioTrabajo.findByIdAndUpdate(
+        espacioId,
+        {
+          titulo,
+          descripcion,
+          ubicacion,
+          capacidad,
+          precioDia,
+        },
+        { new: true }
+      )
+      if (!EspacioTrabajoEditado) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'Hubo un error al editar el espacio de trabajo',
+        })
+      }
+      console.log(EspacioTrabajoEditado)
+      return res.status(200).json({
+        ok: true,
+        mensaje: 'Espacio de trabajo editado',
+        espacioTrabajo: EspacioTrabajoEditado,
+      })
     }
 
     const result = await cloudinary.uploader.upload(req.file.path)
@@ -321,5 +355,5 @@ module.exports = {
   nuevoEspacioTrabajo,
   editarEspacioTrabajo,
   eliminarEspacioTrabajo,
-  searchEspaciosTrabajo
+  searchEspaciosTrabajo,
 }
