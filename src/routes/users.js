@@ -7,6 +7,7 @@ const {
   updateUserById,
   deleteUserById,
 } = require('../routes/controllers/usuariosControllers')
+const validateToken = require('./controllers/jwtAuth')
 const router = express.Router()
 
 // Ruta para registrar admin
@@ -20,9 +21,9 @@ router
 
   .get('/getById/:id', getUserById)
 
-  .put('/updateById/:id', updateUserById)
+  .put('/updateById/:id', validateToken, updateUserById)
 
-  .delete('/deleteById/:id', deleteUserById)
+  .delete('/deleteById/:id', validateToken, deleteUserById)
 
 // Esquema de usuarios Swagger
 /**
