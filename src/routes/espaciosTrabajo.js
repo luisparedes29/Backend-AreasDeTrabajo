@@ -12,19 +12,21 @@ const {
   eliminarEspacioTrabajo,
   searchEspaciosTrabajo
 } = require('./controllers/espaciosTrabajoControllers')
+const validateToken = require('./controllers/jwtAuth')
 
 router
   .get('/', obtenerEspaciosTrabajo)
   .get('/buscar/:espacioId', obtenerEspacioTrabajoID)
   .get('/mapa', obtenerEspaciosTrabajoMapa)
   .get('/espacios', obtenerSeisEspaciosTrabajo)
-  .post('/nuevo', upload.single('imagenReferencia'), nuevoEspacioTrabajo)
+  .post('/nuevo', validateToken, upload.single('imagenReferencia'), nuevoEspacioTrabajo)
   .put(
     '/editar/:espacioId',
+    validateToken,
     upload.single('imagenReferencia'),
     editarEspacioTrabajo
   )
-  .delete('/eliminar/:espacioId', eliminarEspacioTrabajo)
+  .delete('/eliminar/:espacioId', validateToken, eliminarEspacioTrabajo)
   .get('/buscar/', searchEspaciosTrabajo)
 
 
