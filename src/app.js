@@ -13,6 +13,7 @@ const { swaggerDocs: V1SwaggerDocs } = require('./v1/swagger')
 const reservacionesRouter = require('./routes/reservaciones')
 const usersRouter = require('./routes/users')
 const espaciosRouter = require('./routes/espaciosTrabajo')
+const informesRouter = require('./routes/informes')
 
 require('dotenv').config()
 
@@ -32,6 +33,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 app.use('/espaciosTrabajo', espaciosRouter)
 app.use('/reservaciones', reservacionesRouter)
 app.use('/users', usersRouter)
+app.use('/informes', informesRouter)
 
 V1SwaggerDocs(app, 3000)
 
