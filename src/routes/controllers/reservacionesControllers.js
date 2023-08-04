@@ -25,7 +25,7 @@ const obtenerReservaciones = async (req, res) => {
 
     return res.status(200).json({ ok: true, reservaciones: reservaciones })
   } catch (error) {
-    console.error('Error al obtener reservaciones:', error)
+    //console.error('Error al obtener reservaciones:', error)
     return res
       .status(500)
       .json({ mensaje: 'Hubo un error al obtener las reservaciones.' })
@@ -51,10 +51,10 @@ const obtenerReservacionesPorEspacio = async (req, res) => {
 
     return res.status(200).json({ ok: true, reservaciones: reservaciones })
   } catch (error) {
-    console.error(
-      'Error al obtener las reservaciones por espacio de trabajo:',
-      error
-    )
+    // console.error(
+    //   'Error al obtener las reservaciones por espacio de trabajo:',
+    //   error
+    // )
     return res
       .status(500)
       .json({ mensaje: 'Hubo un error al obtener las reservaciones.' })
