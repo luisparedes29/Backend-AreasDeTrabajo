@@ -11,8 +11,8 @@ const {
 /* GET home page. */
 router
   .get('/', obtenerReservaciones)
-  .get('/:espacioId', obtenerReservacionesPorEspacio)
-  .get('/:usuarioId', obtenerReservacionesPorUsuario)
+  .get('/1/:espacioId', obtenerReservacionesPorEspacio)
+  .get('/2/:usuarioId', obtenerReservacionesPorUsuario)
   .post('/nuevaReservacion/:espacioId/:usuarioId', nuevaReservacion)
   .delete('/eliminarReservacion/:reservacionId', eliminarReservacion)
 
@@ -113,7 +113,7 @@ router
 
 /**
  * @openapi
- * /reservaciones/{espacioId}:
+ * /reservaciones/1/{espacioId}:
  *   get:
  *     tags:
  *       - Reservaciones
@@ -155,7 +155,7 @@ router
 
 /**
  * @openapi
- * /obtenerReservacionesPorUsuario/{usuarioId}:
+ * /reservaciones/2/{usuarioId}:
  *   get:
  *     tags:
  *       - Reservaciones
