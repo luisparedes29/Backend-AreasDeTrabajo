@@ -2,6 +2,8 @@ const Reservaciones = require('../../models/reservaciones')
 const EspacioTrabajo = require('../../models/espacioTrabajo')
 const moment = require('moment')
 const Usuarios = require('../../models/usuarios')
+const transporter = require('./mailer');
+const mailGenerator = require('./mail');
 
 const obtenerReservaciones = async (req, res) => {
   try {
@@ -137,6 +139,43 @@ const nuevaReservacion = async (req, res) => {
     // Calcular el precio total de la reservación
     const precioTotal = espacioTrabajo.precioDia * numeroDias
 
+    // Preparamos la notificacion
+    const datosUsuario = await Usuarios.findById(usuarioId)
+
+    let name = datosUsuario.nombre
+
+    let response = {
+      body: {
+        greeting: '¡Hola!',
+        signature: 'FlexWork',
+        name,
+        intro: '¡Tu reservación ha sido exitosa!',
+        table: {
+          data: [
+            {
+              espacio: espacioTrabajo.titulo,
+              precio: `$${precioTotal}`,
+              detalles: detalles,
+              fechaInicio: fechaInicio,
+              fechaFin: fechaFin,
+              horaInicio: horaInicioDate,
+              horaFin: horaFinDate
+            },
+          ],
+        },
+        outro: '¡Esperamos seguir ofreciendo un servicio de calidad!',
+      },
+    }
+
+    let mail = mailGenerator.generate(response)
+
+    let message = {
+      from: process.env.EMAIL,
+      to: datosUsuario.email,
+      subject: 'Reservacion',
+      html: mail,
+    }
+
     // Crear la reservación con el array de fechas completo y el precio total
     const nuevaReservacionData = {
       usuarioId,
@@ -169,6 +208,7 @@ const nuevaReservacion = async (req, res) => {
       { new: true }
     )
 
+    let info = await transporter.sendMail(message)
     return res.status(201).json({ ok: true, reservacion: nuevaReservacion })
   } catch (error) {
     console.error('Error al crear reservación:', error)
