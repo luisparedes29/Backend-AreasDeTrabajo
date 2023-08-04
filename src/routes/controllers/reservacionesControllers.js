@@ -2,8 +2,8 @@ const Reservaciones = require('../../models/reservaciones')
 const EspacioTrabajo = require('../../models/espacioTrabajo')
 const moment = require('moment')
 const Usuarios = require('../../models/usuarios')
-const transporter = require('./mailer');
-const mailGenerator = require('./mail');
+const transporter = require('./mailer')
+const mailGenerator = require('./mail')
 
 const obtenerReservaciones = async (req, res) => {
   try {
@@ -83,6 +83,8 @@ const nuevaReservacion = async (req, res) => {
     const endDate = moment(fechaFin)
     const horaInicioDate = moment(horaInicio, 'HH:mm').toDate()
     const horaFinDate = moment(horaFin, 'HH:mm').toDate()
+    const hoy = moment()
+    const fechaLimiteCancelar = hoy.add(3, 'days').toDate()
 
     while (currentDate.isSameOrBefore(endDate, 'day')) {
       fechasReservacion.push(currentDate.toDate())
@@ -159,7 +161,7 @@ const nuevaReservacion = async (req, res) => {
               fechaInicio: fechaInicio,
               fechaFin: fechaFin,
               horaInicio: horaInicioDate,
-              horaFin: horaFinDate
+              horaFin: horaFinDate,
             },
           ],
         },
@@ -180,12 +182,12 @@ const nuevaReservacion = async (req, res) => {
     const nuevaReservacionData = {
       usuarioId,
       espacioId,
-      validacionFechasReservacion: fechasReservacion,
       fechaInicioYFinal: { fechaInicio, fechaFin },
       horaInicioYFinal: {
         horaInicio: horaInicioDate,
         horaFin: horaFinDate,
       },
+      fechaLimiteCancelacion: fechaLimiteCancelar,
       detalles,
       precioTotal,
     }
@@ -222,25 +224,42 @@ const eliminarReservacion = async (req, res) => {
   try {
     const reservacionId = req.params.reservacionId
 
-    // Buscar y eliminar la reserva por su ID utilizando findByIdAndDelete
-    const reservacionEliminada = await Reservaciones.findByIdAndDelete(
-      reservacionId
-    )
+    // Buscar la reserva por su ID utilizando findById
+    const reservacion = await Reservaciones.findById(reservacionId)
 
-    if (!reservacionEliminada) {
+    if (!reservacion) {
       return res.status(404).json({ mensaje: 'Reservación no encontrada.' })
     }
 
-    // Eliminar la referencia de la reserva en el espacio de trabajo utilizando findByIdAndUpdate
-    const espacioTrabajoId = reservacionEliminada.espacioId
-    await EspacioTrabajo.findByIdAndUpdate(espacioTrabajoId, {
-      $pull: { reservaciones: reservacionId },
-    })
+    // Validar la fecha actual
+    const fechaLimiteCancelar = reservacion.fechaLimiteCancelacion
+    const fechaActual = moment()
 
-    return res.status(200).json({
-      ok: true,
-      _id: reservacionId,
-    })
+    if (fechaActual.isBefore(fechaLimiteCancelar)) {
+      // La fecha actual es menor a la fecha límite de cancelación
+      // Eliminar la referencia de la reserva en el espacio de trabajo utilizando findByIdAndUpdate
+      const espacioTrabajoId = reservacion.espacioId
+      await EspacioTrabajo.findByIdAndUpdate(espacioTrabajoId, {
+        $pull: { reservaciones: reservacionId },
+      })
+
+      // Eliminar la reserva utilizando findByIdAndDelete
+      const reservacionEliminada = await Reservaciones.findByIdAndDelete(
+        reservacionId
+      )
+
+      return res.status(200).json({
+        ok: true,
+        _id: reservacionId,
+      })
+    } else {
+      // La fecha actual es mayor o igual a la fecha límite de cancelación
+      return res.status(400).json({
+        ok: false,
+        mensaje:
+          'No se puede cancelar la reserva. La fecha límite de cancelación ha pasado.',
+      })
+    }
   } catch (error) {
     console.error('Error al eliminar reservación:', error)
     return res

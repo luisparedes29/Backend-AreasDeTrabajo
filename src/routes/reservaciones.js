@@ -31,28 +31,44 @@ router
  *           $ref: '#/components/schemas/Usuarios'
  *         espacioId:
  *           $ref: '#/components/schemas/EspacioTrabajo'
- *         validacionFechasReservacion:
- *           type: array
- *           items:
- *             type: string
- *             format: date
- *             example: 2022-01-01
+ *         fechaLimiteCancelacion:
+ *           type: string
+ *           format: date
+ *           example: '2022-01-01'
  *         fechaInicioYFinal:
  *           type: object
  *           properties:
  *             fechaInicio:
  *               type: string
  *               format: date
- *               example: 2022-01-01
+ *               example: '2022-01-01'
  *             fechaFin:
  *               type: string
  *               format: date
- *               example: 2022-01-05
+ *               example: '2022-01-05'
+ *         horaInicioYFinal:
+ *           type: object
+ *           properties:
+ *             horaInicio:
+ *               type: string
+ *               format: time
+ *               example: '08:00'
+ *             horaFin:
+ *               type: string
+ *               format: time
+ *               example: '17:00'
  *         detalles:
  *           type: string
  *         precioTotal:
  *           type: number
  *           example: 500.00
+ *       required:
+ *         - usuarioId
+ *         - espacioId
+ *         - fechaLimiteCancelacion
+ *         - fechaInicioYFinal
+ *         - horaInicioYFinal
+ *         - precioTotal
  */
 
 // Endpoints documentados correspondiente a las reservaciones Swagger
