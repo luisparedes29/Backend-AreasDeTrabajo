@@ -1,6 +1,8 @@
 const bcrypt = require('bcrypt');
 const Usuarios = require('../../models/usuarios');
 const { createToken } = require('./jwtCreate');
+const transporter = require('./mailer');
+const mailGenerator = require('./mail');
 
 const registerUser = async (req, res) => {
     try {
@@ -24,6 +26,34 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ error: 'La contraseña debe ser de al menos 6 caracteres, incluir una mayúscula y un número.' });
         }
 
+        
+        let response = {
+          body: {
+            greeting: '¡Hola!',
+            signature: 'FlexWork',
+            nombre,
+            intro: '¡Te has registrado con éxito a FlexWork!',
+            table: {
+              data: [
+                {
+                  nombre: nombre,
+                  email: email
+                },
+              ],
+            },
+            outro: '¡Gracias por formar parte de nuestros Clientes!',
+          },
+        }
+    
+        let mail = mailGenerator.generate(response)
+    
+        let message = {
+          from: process.env.EMAIL,
+          to: datosUsuario.email,
+          subject: 'Reservacion',
+          html: mail,
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await Usuarios.create({
             nombre,
@@ -31,6 +61,8 @@ const registerUser = async (req, res) => {
             password: hashedPassword,
             admin: admin || false
         });
+
+        let info = await transporter.sendMail(message)
         let token = createToken({ id: user._id, nombre: user.nombre, email: user.email, admin: user.admin });
         res.status(200).json({ token, email: user.email, admin: user.admin });
     } catch (error) {
