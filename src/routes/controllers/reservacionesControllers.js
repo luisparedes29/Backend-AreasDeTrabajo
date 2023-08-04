@@ -255,6 +255,7 @@ const eliminarReservacion = async (req, res) => {
     } else {
       // La fecha actual es mayor o igual a la fecha límite de cancelación
       return res.status(400).json({
+        ok: false,
         mensaje:
           'No se puede cancelar la reserva. La fecha límite de cancelación ha pasado.',
       })
