@@ -4,6 +4,7 @@ const moment = require('moment')
 const Usuarios = require('../../models/usuarios')
 const transporter = require('./mailer')
 const mailGenerator = require('./mail')
+const mongoose = require('mongoose')
 
 const obtenerReservaciones = async (req, res) => {
   try {
@@ -35,6 +36,14 @@ const obtenerReservacionesPorEspacio = async (req, res) => {
   try {
     const espacioId = req.params.espacioId
 
+    //validacion ID que sea de Mongoose
+    if (!mongoose.isValidObjectId(espacioId)) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'ID no válido',
+      })
+    }
+
     // Obtener las reservaciones del espacio de trabajo especificado y realizar el populate
     const reservaciones = await Reservaciones.find({ espacioId })
       .populate('espacioId')
@@ -56,10 +65,29 @@ const obtenerReservacionesPorUsuario = async (req, res) => {
   try {
     const usuarioId = req.params.usuarioId
 
+    // Validación si es un id mongoose válido
+    if (!mongoose.isValidObjectId(usuarioId)) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'ID no válido',
+      })
+    }
+
     // Obtener las reservaciones realizadas por el usuario especificado y realizar el populate
-    const reservaciones = await Reservaciones.find({ usuarioId }).populate(
-      'espacioId'
-    )
+    const reservaciones = await Reservaciones.find({ usuarioId }).populate({
+      path: 'espacioId',
+      select:
+        'titulo descripcion direccion capacidad precioDia imagenReferencia',
+    })
+
+    // Verificar si se encontraron reservaciones
+    if (reservaciones.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        mensaje:
+          'No se encontraron reservaciones para el usuario especificado.',
+      })
+    }
 
     return res.status(200).json({ ok: true, reservaciones: reservaciones })
   } catch (error) {
@@ -76,6 +104,20 @@ const nuevaReservacion = async (req, res) => {
     const { fechaInicio, fechaFin, detalles, horaInicio, horaFin } = req.body
     const espacioId = req.params.espacioId
     const usuarioId = req.params.usuarioId
+
+    //validacion de los ID
+    if (!mongoose.isValidObjectId(espacioId)) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'ID de espacio no válido',
+      })
+    }
+    if (!mongoose.isValidObjectId(usuarioId)) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'ID de usuario no válido',
+      })
+    }
 
     // Generar el array de fechas dentro del rango
     const fechasReservacion = []
@@ -223,6 +265,14 @@ const nuevaReservacion = async (req, res) => {
 const eliminarReservacion = async (req, res) => {
   try {
     const reservacionId = req.params.reservacionId
+
+    //validacion ID
+    if (!mongoose.isValidObjectId(reservacionId)) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'ID reservacion no válido',
+      })
+    }
 
     // Buscar la reserva por su ID utilizando findById
     const reservacion = await Reservaciones.findById(reservacionId)
