@@ -10,7 +10,7 @@ const {
   nuevoEspacioTrabajo,
   editarEspacioTrabajo,
   eliminarEspacioTrabajo,
-  searchEspaciosTrabajo
+  searchEspaciosTrabajo,
 } = require('./controllers/espaciosTrabajoControllers')
 const validateToken = require('./controllers/jwtAuth')
 
@@ -19,7 +19,12 @@ router
   .get('/buscar/:espacioId', obtenerEspacioTrabajoID)
   .get('/mapa', obtenerEspaciosTrabajoMapa)
   .get('/espacios', obtenerSeisEspaciosTrabajo)
-  .post('/nuevo', validateToken, upload.single('imagenReferencia'), nuevoEspacioTrabajo)
+  .post(
+    '/nuevo',
+    validateToken,
+    upload.single('imagenReferencia'),
+    nuevoEspacioTrabajo
+  )
   .put(
     '/editar/:espacioId',
     validateToken,
@@ -27,8 +32,7 @@ router
     editarEspacioTrabajo
   )
   .delete('/eliminar/:espacioId', validateToken, eliminarEspacioTrabajo)
-  .get('/buscar/', searchEspaciosTrabajo)
-
+  .post('/buscar/', searchEspaciosTrabajo)
 
 // Esquema de espacios de trabajo Swagger
 /**
@@ -74,8 +78,6 @@ router
  *           type: number
  *           example: 150.0
  */
-
-
 
 // Endpoints documentados de los espacios de trabajo Swagger
 /**
@@ -132,8 +134,58 @@ router
  *                   description: Mensaje de error.
  *                   example:  Hubo un problema al obtener los espacios de trabajo.
  *
- * 
- * 
+ *
+ *
+ * /espaciosTrabajo/buscar:
+ *   post:
+ *     tags:
+ *       - Espacios de Trabajo
+ *     summary: Buscar espacios de trabajo por palabra clave.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               palabraClave:
+ *                 type: string
+ *             example:
+ *               palabraClave: "oficina"
+ *     responses:
+ *       '200':
+ *         description: Respuesta exitosa. Devuelve los espacios de trabajo que coinciden con la palabra clave.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/EspacioTrabajo'
+ *       '400':
+ *         description: Solicitud incorrecta.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Mensaje de error.
+ *                   example: No se proporcionó una palabra clave.
+ *       '500':
+ *         description: Error del servidor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Mensaje de error.
+ *                   example: Hubo un problema al buscar los espacios de trabajo.
+ *
+ *
+ *
  * /espaciosTrabajo/{espacioId}:
  *   get:
  *     tags:
@@ -181,8 +233,8 @@ router
  *                   type: string
  *                   description: Mensaje de error.
  *                   example: Hubo un error al obtener el espacio de trabajo.
- * 
- * 
+ *
+ *
  * /espaciosTrabajo/espacios:
  *   get:
  *     tags:
@@ -214,7 +266,7 @@ router
  *                   type: string
  *                   description: Mensaje de error.
  *                   example: Hubo un error al obtener los espacios de trabajo.
- * 
+ *
  * /espaciosTrabajo/mapa:
  *   get:
  *     tags:
@@ -246,7 +298,7 @@ router
  *                   type: string
  *                   description: Mensaje de error.
  *                   example: Hubo un error al obtener los espacios de trabajo para el mapa.
- * 
+ *
  * /espaciosTrabajo/nuevo:
  *   post:
  *     tags:
@@ -265,7 +317,7 @@ router
  *                 type: string
  *               ubicacion[latitud]:
  *                 type: number
-  *               ubicacion[longitud]:
+ *               ubicacion[longitud]:
  *                 type: number
  *               capacidad:
  *                 type: integer
@@ -337,7 +389,7 @@ router
  *                 type: string
  *               ubicacion[latitud]:
  *                 type: number
-  *               ubicacion[longitud]:
+ *               ubicacion[longitud]:
  *                 type: number
  *               capacidad:
  *                 type: integer
@@ -439,9 +491,5 @@ router
  *                   description: Mensaje de error.
  *                   example: Hubo un error al eliminar el espacio de trabajo.
  */
-
-
-
-
 
 module.exports = router

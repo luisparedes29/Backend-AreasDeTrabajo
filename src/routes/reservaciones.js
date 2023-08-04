@@ -16,7 +16,6 @@ router
   .post('/nuevaReservacion/:espacioId/:usuarioId', nuevaReservacion)
   .delete('/eliminarReservacion/:reservacionId', eliminarReservacion)
 
-
 // Rutas para el esquema de reservaciones Swagger
 /**
  * @openapi
@@ -55,8 +54,6 @@ router
  *           type: number
  *           example: 500.00
  */
-
-
 
 // Endpoints documentados correspondiente a las reservaciones Swagger
 /**
@@ -217,6 +214,14 @@ router
  *                 type: string
  *                 format: date
  *                 example: 2022-01-05
+ *               horaInicio:
+ *                 type: string
+ *                 format: date
+ *                 example: 14:00
+ *               horaFin:
+ *                 type: string
+ *                 format: date
+ *                 example: 16:00
  *               detalles:
  *                 type: string
  *             required:
@@ -315,6 +320,57 @@ router
  *                 mensaje:
  *                   type: string
  *                   description: Mensaje de error.
+ */
+
+/**
+ * @openapi
+ * /espaciosTrabajo/buscar/:
+ *   post:
+ *     tags:
+ *       - Espacios de Trabajo
+ *     summary: Buscar espacios de trabajo por palabra clave.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               palabraClave:
+ *                 type: string
+ *             example:
+ *               palabraClave: "oficina"
+ *     responses:
+ *       '200':
+ *         description: Respuesta exitosa. Devuelve los espacios de trabajo que coinciden con la palabra clave.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/EspacioTrabajo'
+ *       '400':
+ *         description: Solicitud incorrecta.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Mensaje de error.
+ *                   example: No se proporcionó una palabra clave.
+ *       '500':
+ *         description: Error del servidor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Mensaje de error.
+ *                   example: Hubo un problema al buscar los espacios de trabajo.
  */
 
 module.exports = router
