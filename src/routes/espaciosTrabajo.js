@@ -13,12 +13,14 @@ const {
   searchEspaciosTrabajo,
 } = require('./controllers/espaciosTrabajoControllers')
 const validateToken = require('./controllers/jwtAuth')
+const apicache = require('apicache')
+const cache = apicache.middleware
 
 router
-  .get('/', obtenerEspaciosTrabajo)
+  .get('/', cache('10 minutes'), obtenerEspaciosTrabajo)
   .get('/buscar/:espacioId', obtenerEspacioTrabajoID)
-  .get('/mapa', obtenerEspaciosTrabajoMapa)
-  .get('/espacios', obtenerSeisEspaciosTrabajo)
+  .get('/mapa', cache('10 minutes'), obtenerEspaciosTrabajoMapa)
+  .get('/espacios', cache('30 minutes'), obtenerSeisEspaciosTrabajo)
   .post(
     '/nuevo',
     validateToken,
