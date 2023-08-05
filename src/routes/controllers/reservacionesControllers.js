@@ -2,6 +2,9 @@ const Reservaciones = require('../../models/reservaciones')
 const EspacioTrabajo = require('../../models/espacioTrabajo')
 const moment = require('moment')
 const Usuarios = require('../../models/usuarios')
+const transporter = require('./mailer')
+const mailGenerator = require('./mail')
+const mongoose = require('mongoose')
 
 const obtenerReservaciones = async (req, res) => {
   try {
@@ -22,7 +25,7 @@ const obtenerReservaciones = async (req, res) => {
 
     return res.status(200).json({ ok: true, reservaciones: reservaciones })
   } catch (error) {
-    console.error('Error al obtener reservaciones:', error)
+    //console.error('Error al obtener reservaciones:', error)
     return res
       .status(500)
       .json({ mensaje: 'Hubo un error al obtener las reservaciones.' })
@@ -33,6 +36,14 @@ const obtenerReservacionesPorEspacio = async (req, res) => {
   try {
     const espacioId = req.params.espacioId
 
+    //validacion ID que sea de Mongoose
+    if (!mongoose.isValidObjectId(espacioId)) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'ID no válido',
+      })
+    }
+
     // Obtener las reservaciones del espacio de trabajo especificado y realizar el populate
     const reservaciones = await Reservaciones.find({ espacioId })
       .populate('espacioId')
@@ -40,10 +51,10 @@ const obtenerReservacionesPorEspacio = async (req, res) => {
 
     return res.status(200).json({ ok: true, reservaciones: reservaciones })
   } catch (error) {
-    console.error(
-      'Error al obtener las reservaciones por espacio de trabajo:',
-      error
-    )
+    // console.error(
+    //   'Error al obtener las reservaciones por espacio de trabajo:',
+    //   error
+    // )
     return res
       .status(500)
       .json({ mensaje: 'Hubo un error al obtener las reservaciones.' })
@@ -54,10 +65,29 @@ const obtenerReservacionesPorUsuario = async (req, res) => {
   try {
     const usuarioId = req.params.usuarioId
 
+    // Validación si es un id mongoose válido
+    if (!mongoose.isValidObjectId(usuarioId)) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'ID no válido',
+      })
+    }
+
     // Obtener las reservaciones realizadas por el usuario especificado y realizar el populate
-    const reservaciones = await Reservaciones.find({ usuarioId }).populate(
-      'espacioId'
-    )
+    const reservaciones = await Reservaciones.find({ usuarioId }).populate({
+      path: 'espacioId',
+      select:
+        'titulo descripcion direccion capacidad precioDia imagenReferencia',
+    })
+
+    // Verificar si se encontraron reservaciones
+    if (reservaciones.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        mensaje:
+          'No se encontraron reservaciones para el usuario especificado.',
+      })
+    }
 
     return res.status(200).json({ ok: true, reservaciones: reservaciones })
   } catch (error) {
@@ -75,12 +105,28 @@ const nuevaReservacion = async (req, res) => {
     const espacioId = req.params.espacioId
     const usuarioId = req.params.usuarioId
 
+    //validacion de los ID
+    if (!mongoose.isValidObjectId(espacioId)) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'ID de espacio no válido',
+      })
+    }
+    if (!mongoose.isValidObjectId(usuarioId)) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'ID de usuario no válido',
+      })
+    }
+
     // Generar el array de fechas dentro del rango
     const fechasReservacion = []
     const currentDate = moment(fechaInicio)
     const endDate = moment(fechaFin)
     const horaInicioDate = moment(horaInicio, 'HH:mm').toDate()
     const horaFinDate = moment(horaFin, 'HH:mm').toDate()
+    const hoy = moment()
+    const fechaLimiteCancelar = hoy.add(3, 'days').toDate()
 
     while (currentDate.isSameOrBefore(endDate, 'day')) {
       fechasReservacion.push(currentDate.toDate())
@@ -137,16 +183,53 @@ const nuevaReservacion = async (req, res) => {
     // Calcular el precio total de la reservación
     const precioTotal = espacioTrabajo.precioDia * numeroDias
 
+    // Preparamos la notificacion
+    const datosUsuario = await Usuarios.findById(usuarioId)
+
+    let name = datosUsuario.nombre
+
+    let response = {
+      body: {
+        greeting: '¡Hola!',
+        signature: 'FlexWork',
+        name,
+        intro: '¡Tu reservación ha sido exitosa!',
+        table: {
+          data: [
+            {
+              espacio: espacioTrabajo.titulo,
+              precio: `$${precioTotal}`,
+              detalles: detalles,
+              fechaInicio: fechaInicio,
+              fechaFin: fechaFin,
+              horaInicio: horaInicioDate,
+              horaFin: horaFinDate,
+            },
+          ],
+        },
+        outro: '¡Esperamos seguir ofreciendo un servicio de calidad!',
+      },
+    }
+
+    let mail = mailGenerator.generate(response)
+
+    let message = {
+      from: process.env.EMAIL,
+      to: datosUsuario.email,
+      subject: 'Reservacion',
+      html: mail,
+    }
+
     // Crear la reservación con el array de fechas completo y el precio total
     const nuevaReservacionData = {
       usuarioId,
       espacioId,
-      validacionFechasReservacion: fechasReservacion,
       fechaInicioYFinal: { fechaInicio, fechaFin },
       horaInicioYFinal: {
         horaInicio: horaInicioDate,
         horaFin: horaFinDate,
       },
+      fechaLimiteCancelacion: fechaLimiteCancelar,
       detalles,
       precioTotal,
     }
@@ -169,6 +252,7 @@ const nuevaReservacion = async (req, res) => {
       { new: true }
     )
 
+    let info = await transporter.sendMail(message)
     return res.status(201).json({ ok: true, reservacion: nuevaReservacion })
   } catch (error) {
     console.error('Error al crear reservación:', error)
@@ -182,25 +266,50 @@ const eliminarReservacion = async (req, res) => {
   try {
     const reservacionId = req.params.reservacionId
 
-    // Buscar y eliminar la reserva por su ID utilizando findByIdAndDelete
-    const reservacionEliminada = await Reservaciones.findByIdAndDelete(
-      reservacionId
-    )
+    //validacion ID
+    if (!mongoose.isValidObjectId(reservacionId)) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'ID reservacion no válido',
+      })
+    }
 
-    if (!reservacionEliminada) {
+    // Buscar la reserva por su ID utilizando findById
+    const reservacion = await Reservaciones.findById(reservacionId)
+
+    if (!reservacion) {
       return res.status(404).json({ mensaje: 'Reservación no encontrada.' })
     }
 
-    // Eliminar la referencia de la reserva en el espacio de trabajo utilizando findByIdAndUpdate
-    const espacioTrabajoId = reservacionEliminada.espacioId
-    await EspacioTrabajo.findByIdAndUpdate(espacioTrabajoId, {
-      $pull: { reservaciones: reservacionId },
-    })
+    // Validar la fecha actual
+    const fechaLimiteCancelar = reservacion.fechaLimiteCancelacion
+    const fechaActual = moment()
 
-    return res.status(200).json({
-      ok: true,
-      _id: reservacionId,
-    })
+    if (fechaActual.isBefore(fechaLimiteCancelar)) {
+      // La fecha actual es menor a la fecha límite de cancelación
+      // Eliminar la referencia de la reserva en el espacio de trabajo utilizando findByIdAndUpdate
+      const espacioTrabajoId = reservacion.espacioId
+      await EspacioTrabajo.findByIdAndUpdate(espacioTrabajoId, {
+        $pull: { reservaciones: reservacionId },
+      })
+
+      // Eliminar la reserva utilizando findByIdAndDelete
+      const reservacionEliminada = await Reservaciones.findByIdAndDelete(
+        reservacionId
+      )
+
+      return res.status(200).json({
+        ok: true,
+        _id: reservacionId,
+      })
+    } else {
+      // La fecha actual es mayor o igual a la fecha límite de cancelación
+      return res.status(400).json({
+        ok: false,
+        mensaje:
+          'No se puede cancelar la reserva. La fecha límite de cancelación ha pasado.',
+      })
+    }
   } catch (error) {
     console.error('Error al eliminar reservación:', error)
     return res

@@ -11,11 +11,10 @@ const {
 /* GET home page. */
 router
   .get('/', obtenerReservaciones)
-  .get('/:espacioId', obtenerReservacionesPorEspacio)
-  .get('/:usuarioId', obtenerReservacionesPorUsuario)
+  .get('/1/:espacioId', obtenerReservacionesPorEspacio)
+  .get('/2/:usuarioId', obtenerReservacionesPorUsuario)
   .post('/nuevaReservacion/:espacioId/:usuarioId', nuevaReservacion)
   .delete('/eliminarReservacion/:reservacionId', eliminarReservacion)
-
 
 // Rutas para el esquema de reservaciones Swagger
 /**
@@ -32,31 +31,45 @@ router
  *           $ref: '#/components/schemas/Usuarios'
  *         espacioId:
  *           $ref: '#/components/schemas/EspacioTrabajo'
- *         validacionFechasReservacion:
- *           type: array
- *           items:
- *             type: string
- *             format: date
- *             example: 2022-01-01
+ *         fechaLimiteCancelacion:
+ *           type: string
+ *           format: date
+ *           example: '2022-01-01'
  *         fechaInicioYFinal:
  *           type: object
  *           properties:
  *             fechaInicio:
  *               type: string
  *               format: date
- *               example: 2022-01-01
+ *               example: '2022-01-01'
  *             fechaFin:
  *               type: string
  *               format: date
- *               example: 2022-01-05
+ *               example: '2022-01-05'
+ *         horaInicioYFinal:
+ *           type: object
+ *           properties:
+ *             horaInicio:
+ *               type: string
+ *               format: time
+ *               example: '08:00'
+ *             horaFin:
+ *               type: string
+ *               format: time
+ *               example: '17:00'
  *         detalles:
  *           type: string
  *         precioTotal:
  *           type: number
  *           example: 500.00
+ *       required:
+ *         - usuarioId
+ *         - espacioId
+ *         - fechaLimiteCancelacion
+ *         - fechaInicioYFinal
+ *         - horaInicioYFinal
+ *         - precioTotal
  */
-
-
 
 // Endpoints documentados correspondiente a las reservaciones Swagger
 /**
@@ -100,7 +113,7 @@ router
 
 /**
  * @openapi
- * /reservaciones/{espacioId}:
+ * /reservaciones/1/{espacioId}:
  *   get:
  *     tags:
  *       - Reservaciones
@@ -142,7 +155,7 @@ router
 
 /**
  * @openapi
- * /obtenerReservacionesPorUsuario/{usuarioId}:
+ * /reservaciones/2/{usuarioId}:
  *   get:
  *     tags:
  *       - Reservaciones
@@ -217,6 +230,14 @@ router
  *                 type: string
  *                 format: date
  *                 example: 2022-01-05
+ *               horaInicio:
+ *                 type: string
+ *                 format: date
+ *                 example: 14:00
+ *               horaFin:
+ *                 type: string
+ *                 format: date
+ *                 example: 16:00
  *               detalles:
  *                 type: string
  *             required:
