@@ -49,7 +49,7 @@ const registerUser = async (req, res) => {
     
         let message = {
           from: process.env.EMAIL,
-          to: datosUsuario.email,
+          to: email,
           subject: 'Reservacion',
           html: mail,
         }
